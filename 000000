@@ -320,6 +320,162 @@ local tabContainerLine = new("Frame", {
     })
     makeCorner(content, 4)
 
+--// Scripts Side Panel
+
+local panelWidth = 180
+local panelOpen = false
+
+local scriptsPanel = Instance.new("Frame")
+scriptsPanel.Name = "ScriptsPanel"
+scriptsPanel.Parent = screenGui
+scriptsPanel.BackgroundColor3 = Theme.ContainerHolder
+scriptsPanel.BorderSizePixel = 0
+scriptsPanel.ClipsDescendants = true
+scriptsPanel.Visible = true
+scriptsPanel.Size = UDim2.new(0,0,0,content.AbsoluteSize.Y)
+scriptsPanel.Position = UDim2.new(
+    0,
+    main.AbsolutePosition.X + main.AbsoluteSize.X + 4,
+    0,
+    content.AbsolutePosition.Y
+)
+
+makeCorner(scriptsPanel,6)
+
+local panelStroke = Instance.new("UIStroke")
+panelStroke.Parent = scriptsPanel
+panelStroke.Color = Theme.MainUIStroke
+
+-- Atualiza posição caso a janela seja movida/redimensionada
+RunService.RenderStepped:Connect(function()
+
+    scriptsPanel.Position = UDim2.new(
+        0,
+        main.AbsolutePosition.X + main.AbsoluteSize.X + 4,
+        0,
+        content.AbsolutePosition.Y
+    )
+
+    scriptsPanel.Size = UDim2.new(
+        0,
+        panelOpen and panelWidth or 0,
+        0,
+        content.AbsoluteSize.Y
+    )
+
+end)
+
+--------------------------------------------------------
+
+local panelTitle = Instance.new("TextLabel")
+panelTitle.Parent = scriptsPanel
+panelTitle.BackgroundTransparency = 1
+panelTitle.Size = UDim2.new(1,0,0,30)
+panelTitle.Text = "Scripts"
+panelTitle.Font = Enum.Font.GothamBold
+panelTitle.TextSize = 14
+panelTitle.TextColor3 = Theme.TabText
+
+--------------------------------------------------------
+
+local list = Instance.new("ScrollingFrame")
+list.Parent = scriptsPanel
+list.BackgroundTransparency = 1
+list.BorderSizePixel = 0
+list.Position = UDim2.new(0,5,0,35)
+list.Size = UDim2.new(1,-10,1,-40)
+list.ScrollBarThickness = 3
+list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+local layout = Instance.new("UIListLayout")
+layout.Parent = list
+layout.Padding = UDim.new(0,5)
+
+--------------------------------------------------------
+-- Botão da seta
+
+local arrowButton = Instance.new("TextButton")
+arrowButton.Parent = screenGui
+arrowButton.Size = UDim2.new(0,20,0,60)
+arrowButton.BackgroundColor3 = Theme.TabContainer
+arrowButton.Text = ">"
+arrowButton.Font = Enum.Font.GothamBold
+arrowButton.TextSize = 16
+arrowButton.TextColor3 = Theme.TabText
+arrowButton.BorderSizePixel = 0
+
+makeCorner(arrowButton,6)
+
+local arrowStroke = Instance.new("UIStroke")
+arrowStroke.Parent = arrowButton
+arrowStroke.Color = Theme.MainUIStroke
+
+RunService.RenderStepped:Connect(function()
+
+    arrowButton.Position = UDim2.new(
+        0,
+        main.AbsolutePosition.X + main.AbsoluteSize.X - 10,
+        0,
+        content.AbsolutePosition.Y + 40
+    )
+
+    arrowButton.Visible = main.Visible
+
+    if not main.Visible then
+        scriptsPanel.Visible = false
+    else
+        scriptsPanel.Visible = true
+    end
+
+end)
+
+--------------------------------------------------------
+
+local function ToggleScriptsPanel()
+
+    panelOpen = not panelOpen
+
+    TweenService:Create(
+        scriptsPanel,
+        TweenInfo.new(.25,Enum.EasingStyle.Quart,Enum.EasingDirection.Out),
+        {
+            Size = UDim2.new(0,panelOpen and panelWidth or 0,0,content.AbsoluteSize.Y)
+        }
+    ):Play()
+
+    arrowButton.Text = panelOpen and "<" or ">"
+
+end
+
+arrowButton.MouseButton1Click:Connect(ToggleScriptsPanel)
+
+--------------------------------------------------------
+-- Botões de teste
+
+for i=1,10 do
+
+    local button = Instance.new("TextButton")
+    button.Parent = list
+    button.Size = UDim2.new(1,-2,0,28)
+    button.BackgroundColor3 = Theme.ItemFrame
+    button.Text = "Script "..i
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 12
+    button.TextColor3 = Theme.ItemText
+    button.BorderSizePixel = 0
+
+    makeCorner(button,4)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Parent = button
+    stroke.Color = Theme.ItemUIStroke
+
+    button.MouseButton1Click:Connect(function()
+        print("Script "..i)
+    end)
+
+end
+
     -- container area where each tab adds its content
     local containers = new("Frame", {
         Parent = content,
