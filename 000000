@@ -280,6 +280,9 @@ function ElixirLib:MakeWindow(info)
         end
     end)
 
+    -- windowObj precisa existir antes do MakeSidePanel usar "function windowObj:..."
+    local windowObj = {}
+
     -- ===================== Side Panel (ex: Scripts) =====================
     local SIDE_PANEL_WIDTH = 180
 
@@ -536,8 +539,6 @@ local tabContainerLine = new("Frame", {
     end
 
     -- returned window object
-    local windowObj = {}
-
     -- MakeTab implementation
     function windowObj:MakeTab(tabInfo)
         tabInfo = tabInfo or {}
