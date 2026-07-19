@@ -280,7 +280,7 @@ function ElixirLib:MakeWindow(info)
         end
     end)
 
-    -- ===================== Side Panel (Scripts) =====================
+    -- ===================== Side Panel (ex: Scripts) =====================
     local SIDE_PANEL_WIDTH = 180
 
     local sidePanelObj = new("Frame", {
@@ -301,7 +301,7 @@ function ElixirLib:MakeWindow(info)
         BackgroundColor3 = Theme.Topbar,
         BorderSizePixel = 0,
         Size = UDim2.new(1,0,0,30),
-        Text = "Scripts",
+        Text = "Panel",
         Font = Enum.Font.GothamBold,
         TextSize = 13,
         TextColor3 = Theme.TabText,
@@ -326,14 +326,18 @@ function ElixirLib:MakeWindow(info)
     sidePanelLayout.Padding = UDim.new(0,6)
     new("UIPadding", { Parent = sidePanelScroll, PaddingLeft = UDim.new(0,6), PaddingRight = UDim.new(0,6), PaddingTop = UDim.new(0,4), PaddingBottom = UDim.new(0,6) })
 
-    -- botões de teste 1 a 10 (troque/adicione os seus depois)
-    for i = 1, 10 do
+    -- helper interno para criar um botão dentro do painel lateral
+    local function newSidePanelButton(opt)
+        opt = opt or {}
+        local name = opt.Name or "Button"
+        local callback = opt.Callback or function() end
+
         local sBtn = new("TextButton", {
             Parent = sidePanelScroll,
             BackgroundColor3 = Theme.ItemFrame,
             BorderSizePixel = 0,
             Size = UDim2.new(1,0,0,28),
-            Text = "Script " .. i,
+            Text = name,
             Font = Enum.Font.GothamBold,
             TextSize = 12,
             TextColor3 = Theme.ItemText,
@@ -351,11 +355,39 @@ function ElixirLib:MakeWindow(info)
             TweenService:Create(sBtn, TweenInfo.new(.12), {BackgroundColor3 = Theme.ItemFrame}):Play()
         end)
         sBtn.MouseButton1Click:Connect(function()
-            print("[Scripts Panel] Clicado: Script " .. i)
+            task.spawn(callback)
         end)
+
+        return {
+            Press = function() task.spawn(callback) end,
+            SetText = function(newText) sBtn.Text = tostring(newText) end,
+            Destroy = function() sBtn:Destroy() end
+        }
     end
 
     sidePanel = sidePanelObj
+
+    -- API pública do painel lateral, exposta via Window:MakeSidePanel({Name=...})
+    local sidePanelAPI = {}
+    function sidePanelAPI:AddButton(opt)
+        return newSidePanelButton(opt)
+    end
+    function sidePanelAPI:Clear()
+        for _, v in ipairs(sidePanelScroll:GetChildren()) do
+            if v:IsA("TextButton") then v:Destroy() end
+        end
+    end
+    function sidePanelAPI:SetTitle(newTitle)
+        sidePanelTitle.Text = tostring(newTitle)
+    end
+    function sidePanelAPI:Open() end -- preenchido abaixo, depois de openSidePanel existir
+    function sidePanelAPI:Close() end
+
+    function windowObj:MakeSidePanel(info)
+        info = info or {}
+        sidePanelTitle.Text = info.Name or "Panel"
+        return sidePanelAPI
+    end
 
     -- Botão pequeno com seta, no lado direito do painel
     local sideToggleBtnObj = new("ImageButton", {
@@ -403,6 +435,9 @@ function ElixirLib:MakeWindow(info)
             openSidePanel()
         end
     end)
+
+    sidePanelAPI.Open = openSidePanel
+    sidePanelAPI.Close = closeSidePanel
 
     -- mantém o painel lateral colado e do mesmo tamanho que a main (segue drag/resize)
     RunService.RenderStepped:Connect(function()
@@ -1695,6 +1730,7 @@ local public = {
     -- return object for user
     return {
         MakeTab = windowObj.MakeTab,
+        MakeSidePanel = windowObj.MakeSidePanel,
         _gui = screenGui,
         _main = main
     }
