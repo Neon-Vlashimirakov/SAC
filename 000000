@@ -1,5 +1,5 @@
 -- ElixirLib: MakeWindow, MakeTab (IconId), AddToggle, AddButton, AddSlider, AddInput, AddDropdown, AddKeybind
--- Tema: Escuro
+-- Theme: Dark
 
 local ElixirLib = {}
 ElixirLib.Flags = {}
@@ -9,15 +9,15 @@ local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-Jogadores locais = jogo:ObterServiço("Jogadores")
+local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local RunService = jogo:GetService("RunService")
+local RunService = game:GetService("RunService")
 
--- Tema (Escuro)
-Tema local = {
-    Barra superior = Color3.fromRGB(30,30,35),
+-- Theme (Dark)
+local Theme = {
+    Topbar = Color3.fromRGB(30,30,35),
     TabContainer = Color3.fromRGB(25,25,30),
-    Linhas = Color3.fromRGB(50,50,55),
+    Lines = Color3.fromRGB(50,50,55),
     HoverTabFrame = Color3.fromRGB(53,53,57),
     ItemUIStroke = Color3.fromRGB(41,41,50),
     TabFrame = Color3.fromRGB(35,35,40),
@@ -32,168 +32,168 @@ Tema local = {
     HoverItemFrame = Color3.fromRGB(53,53,57),
     SectionUIStroke = Color3.fromRGB(37,37,44),
     MainUIStroke = Color3.fromRGB(54,54,63),
-    Principal = Color3.fromRGB(20,20,25),
-    Sombra = Color3.fromRGB(20,20,25),
+    Main = Color3.fromRGB(20,20,25),
+    Shadow = Color3.fromRGB(20,20,25),
     TabUIStroke = Color3.fromRGB(39,39,47),
     SliderOuter = Color3.fromRGB(60,60,70),
     SliderInner = Color3.fromRGB(80,201,206),
-    AlternarExterno = Color3.fromRGB(35,35,40),
+    ToggleOuter = Color3.fromRGB(35,35,40),
     InputPlaceHolder = Color3.fromRGB(60,60,65),
     ToggleOuterEnabled = Color3.fromRGB(53,53,61),
-    AlternarTraçoExternoUI = Color3.fromRGB(54,54,62),
+    ToggleOuterUIStroke = Color3.fromRGB(54,54,62),
     ToggleOuterUIStrokeEnabled = Color3.fromRGB(67,67,77),
-    AlternarInterno = Color3.fromRGB(66,66,76),
+    ToggleInner = Color3.fromRGB(66,66,76),
     ToggleInnerEnabled = Color3.fromRGB(80,201,206),
     ContainerHolder = Color3.fromRGB(26,26,31),
-    DestaqueUIStroke = Color3.fromRGB(79,79,86),
-    Destaque = Color3.fromRGB(80,201,206)
+    HighlightUIStroke = Color3.fromRGB(79,79,86),
+    Highlight = Color3.fromRGB(80,201,206)
 }
 
--- Auxiliar para criar instâncias
-função local nova(classe, propriedades)
+-- Helper to create instances
+local function new(class, props)
     local inst = Instance.new(class)
-    para k,v em pares(props ou {}) faça
-        se k == "Pai" então
+    for k,v in pairs(props or {}) do
+        if k == "Parent" then
             inst.Parent = v
-        outro
+        else
             pcall(function() inst[k] = v end)
-        fim
-    fim
-    retornar inst
-fim
+        end
+    end
+    return inst
+end
 
-função local makeCorner(pai, raio)
+local function makeCorner(parent, radius)
     local c = Instance.new("UICorner")
-    c.RaioDoCanto = UDim.new(0, raio ou 4)
-    c.Parent = pai
-    retornar c
-fim
+    c.CornerRadius = UDim.new(0, radius or 4)
+    c.Parent = parent
+    return c
+end
 
--- Pasta raiz
+-- Root folder
 local rootFolder = Instance.new("Folder")
 rootFolder.Name = HttpService:GenerateGUID(false)
 rootFolder.Parent = CoreGui
 
-função ElixirLib:MakeWindow(info)
-    informação = informação ou {}
-    título local = info.Name ou "Janela Elixir"
+function ElixirLib:MakeWindow(info)
+    info = info or {}
+    local title = info.Name or "Elixir Window"
 
     -- ScreenGui
     local screenGui = new("ScreenGui", { Parent = rootFolder, ResetOnSpawn = false })
     screenGui.Name = HttpService:GenerateGUID(false)
 
-    -- Sombra
-    sombra local = novo("ImageLabel", {
-        Pai = screenGui,
+    -- Shadow
+    local shadow = new("ImageLabel", {
+        Parent = screenGui,
         BackgroundTransparency = 1,
-        Tamanho = UDim2.new(0,360,0,260),
-        Posição = UDim2.new(0.37,0,0.35,0),
-        Imagem = "rbxassetid://10740267356",
-        ImageColor3 = Tema.Sombra,
-        Transparência da imagem = 0,8
+        Size = UDim2.new(0,360,0,260),
+        Position = UDim2.new(0.37,0,0.35,0),
+        Image = "rbxassetid://10740267356",
+        ImageColor3 = Theme.Shadow,
+        ImageTransparency = 0.8
     })
-    se não shadow.Image ou shadow.Image == "" então
-        sombra:Destruir()
-        sombra = novo("Quadro", {
-            Pai = screenGui,
-            BackgroundColor3 = Tema.Sombra,
+    if not shadow.Image or shadow.Image == "" then
+        shadow:Destroy()
+        shadow = new("Frame", {
+            Parent = screenGui,
+            BackgroundColor3 = Theme.Shadow,
             BackgroundTransparency = 0.3,
-            Tamanho = UDim2.new(0,360,0,260),
-            Posição = UDim2.new(0.37,0,0.35,0),
-            Tamanho da BordaPixel = 0
+            Size = UDim2.new(0,360,0,260),
+            Position = UDim2.new(0.37,0,0.35,0),
+            BorderSizePixel = 0
         })
-    fim
-    makeCorner(sombra, 6)
+    end
+    makeCorner(shadow, 6)
 
-    -- Quadro principal (pequeno inicialmente)
+    -- Main frame (pequeno inicialmente)
     local main = new("Frame", {
-        Pai = screenGui,
-        BackgroundColor3 = Tema.Principal,
-        Tamanho = UDim2.new(0,300,0,200),
-        Posição = UDim2.new(0.38,0,0.37,0),
-        TamanhoBordaPixel = 0,
-        ClipsDescendants = verdadeiro
+        Parent = screenGui,
+        BackgroundColor3 = Theme.Main,
+        Size = UDim2.new(0,300,0,200),
+        Position = UDim2.new(0.38,0,0.37,0),
+        BorderSizePixel = 0,
+        ClipsDescendants = true
     })
-    makeCorner(principal, 6)
+    makeCorner(main, 6)
 
-    -- Barra superior
-    barra superior local = novo("Quadro", {
-        Pai = principal,
-        BackgroundColor3 = Tema.BarraSuperior,
-        Tamanho = UDim2.new(1,0,0,30),
-        Tamanho da BordaPixel = 0
+    -- Topbar
+    local topbar = new("Frame", {
+        Parent = main,
+        BackgroundColor3 = Theme.Topbar,
+        Size = UDim2.new(1,0,0,30),
+        BorderSizePixel = 0
     })
     makeCorner(topbar, 6)
 
     local titleLabel = new("TextLabel", {
-        Pai = barra superior,
-        Texto = título,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 13,
-        TextColor3 = Tema.TabText,
+        Parent = topbar,
+        Text = title,
+        Font = Enum.Font.GothamBold,
+        TextSize = 13,
+        TextColor3 = Theme.TabText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,6,0,0),
-        Tamanho = UDim2.new(0.85,0,1,0),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+        Position = UDim2.new(0,6,0,0),
+        Size = UDim2.new(0.85,0,1,0),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    -- Botão Fechar
+    -- Close button
     local closeBtn = new("ImageButton", {
-        Pai = barra superior,
-        Tamanho = UDim2.new(0,17,0,17),
-        Posição = UDim2.new(0.94,0,0.22,0),
+        Parent = topbar,
+        Size = UDim2.new(0,17,0,17),
+        Position = UDim2.new(0.94,0,0.22,0),
         BackgroundTransparency = 1,
-        Imagem = "rbxassetid://10738425363"
+        Image = "rbxassetid://10738425363"
     })
 
-    local isMinimized = falso
-    notificação local exibida = falso
-    função local toggleUI()
-        isMinimized = não isMinimized
-        main.Visible = não isMinimized
-    fim
+    local isMinimized = false
+    local notificationShown = false
+    local function toggleUI()
+        isMinimized = not isMinimized
+        main.Visible = not isMinimized
+    end
 
     closeBtn.MouseButton1Click:Connect(function()
-        se não estiver minimizado, então alterne a interface do usuário() fim
-    fim)
+        if not isMinimized then toggleUI() end
+    end)
 
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        se não gameProcessed e input.KeyCode == Enum.KeyCode.RightShift então
-            alternarUI()
-        fim
-    fim)
+        if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
+            toggleUI()
+        end
+    end)
 
-    -- Arrastar para quadro principal
-    dragMain local, dragInputMain, mousePosMain, framePosMain = falso, nil, nil, nil
-    função local updateMain(entrada)
+    -- Drag do frame principal
+    local draggingMain, dragInputMain, mousePosMain, framePosMain = false, nil, nil, nil
+    local function updateMain(input)
         local delta = input.Position - mousePosMain
         main.Position = UDim2.new(framePosMain.X.Scale, framePosMain.X.Offset + delta.X,
             framePosMain.Y.Scale, framePosMain.Y.Offset + delta.Y)
-    fim
-    barra superior.InputBegan:Conectar(função(entrada)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            arrastandoPrincipal = verdadeiro
+    end
+    topbar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingMain = true
             mousePosMain = input.Position
             framePosMain = main.Position
             input.Changed:Connect(function()
-                se input.UserInputState == Enum.UserInputState.End então
-                    arrastandoPrincipal = falso
-                fim
-            fim)
-        fim
-    fim)
+                if input.UserInputState == Enum.UserInputState.End then
+                    draggingMain = false
+                end
+            end)
+        end
+    end)
     UserInputService.InputChanged:Connect(function(input)
-        se input == dragInputMain e draggingMain então updateMain(input) fim
-    fim)
-    barra superior.EntradaAlterada:Conectar(função(entrada)
-        Se input.UserInputType == Enum.UserInputType.MouseMovement ou input.UserInputType == Enum.UserInputType.Touch então
-            dragInputMain = entrada
-        fim
-    fim)
+        if input == dragInputMain and draggingMain then updateMain(input) end
+    end)
+    topbar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInputMain = input
+        end
+    end)
 
-    -- Botão flutuante
+    -- BotÃ£o flutuante
     local floatButton = Instance.new("ImageButton")
-    floatButton.Name = "Botão de alternância flutuante"
+    floatButton.Name = "FloatingToggleButton"
     floatButton.Size = UDim2.new(0,40,0,40)
     floatButton.Position = UDim2.new(0,20,0.5,-20)
     floatButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
@@ -201,36 +201,36 @@ função ElixirLib:MakeWindow(info)
     floatButton.Parent = screenGui
     floatButton.ZIndex = 10
     local corner = Instance.new("UICorner")
-    canto.RaioDoCanto = UDim.novo(0,100)
-    canto.Pai = botão flutuante
+    corner.CornerRadius = UDim.new(0,100)
+    corner.Parent = floatButton
 
     local draggingFloat, dragInputFloat, dragStartFloat, startPosFloat = false, nil, nil, nil
-    função local updateFloat(entrada)
+    local function updateFloat(input)
         local delta = input.Position - dragStartFloat
         floatButton.Position = UDim2.new(startPosFloat.X.Scale, startPosFloat.X.Offset + delta.X,
             startPosFloat.Y.Scale, startPosFloat.Y.Offset + delta.Y)
-    fim
+    end
     floatButton.InputBegan:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            arrastandoFloat = verdadeiro
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingFloat = true
             dragStartFloat = input.Position
             startPosFloat = floatButton.Position
             input.Changed:Connect(function()
-                Se input.UserInputState == Enum.UserInputState.End então draggingFloat = false fim
-            fim)
-        fim
-    fim)
+                if input.UserInputState == Enum.UserInputState.End then draggingFloat = false end
+            end)
+        end
+    end)
     floatButton.InputChanged:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseMovement ou input.UserInputType == Enum.UserInputType.Touch então
-            dragInputFloat = entrada
-        fim
-    fim)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInputFloat = input
+        end
+    end)
     UserInputService.InputChanged:Connect(function(input)
-        se input == dragInputFloat e draggingFloat então updateFloat(input) fim
-    fim)
+        if input == dragInputFloat and draggingFloat then updateFloat(input) end
+    end)
     floatButton.MouseButton1Click:Connect(toggleUI)
 
-        -- Botão de redimensionamento INVISÍVEL, mostrando apenas o ativo da seta
+        -- BotÃ£o de resize INVISÃVEL, mostrando apenas o asset da seta
         local resizeButton = Instance.new("ImageButton")
         resizeButton.Name = "ResizeButton"
         resizeButton.Size = UDim2.new(0,20,0,20)
@@ -239,7 +239,7 @@ função ElixirLib:MakeWindow(info)
         resizeButton.BackgroundTransparency = 1
         resizeButton.BorderSizePixel = 0
         resizeButton.ZIndex = 50
-        resizeButton.Image = "rbxassetid://3926307971" -- sprite oficial do Roblox
+        resizeButton.Image = "rbxassetid://3926307971" -- sprite oficial Roblox
         resizeButton.ImageRectOffset = Vector2.new(924, 244) -- seta diagonal
         resizeButton.ImageRectSize = Vector2.new(36, 36)
         resizeButton.ImageColor3 = Theme.ItemText
@@ -248,34 +248,34 @@ função ElixirLib:MakeWindow(info)
 
     local resizeDragging, dragInputResize, resizeStart, startSize = false, nil, nil, nil
     resizeButton.InputBegan:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            redimensionararrastar = verdadeiro
-            redimensionarInicial = entrada.Posição
-            tamanhoInicial = tamanhoPrincipal
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            resizeDragging = true
+            resizeStart = input.Position
+            startSize = main.Size
             input.Changed:Connect(function()
-                Se input.UserInputState == Enum.UserInputState.End então resizeDragging = false fim
-            fim)
-        fim
-    fim)
+                if input.UserInputState == Enum.UserInputState.End then resizeDragging = false end
+            end)
+        end
+    end)
     resizeButton.InputChanged:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseMovement ou input.UserInputType == Enum.UserInputType.Touch então
-            dragInputResize = entrada
-        fim
-    fim)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInputResize = input
+        end
+    end)
     UserInputService.InputChanged:Connect(function(input)
-        se input == dragInputResize e resizeDragging então
+        if input == dragInputResize and resizeDragging then
             local delta = input.Position - resizeStart
             main.Size = UDim2.new(0, math.max(200,startSize.X.Offset+delta.X), 0, math.max(150,startSize.Y.Offset+delta.Y))
-            tamanho da sombra = tamanho principal
-        fim
-    fim)
+            shadow.Size = main.Size
+        end
+    end)
 
     -- windowObj precisa existir antes do MakeSidePanel usar "function windowObj:..."
     local windowObj = {}
 
-    -- ===================== Painel Lateral de Scripts (modelo do usuário) ======================
-    larguraDoPainelLocal = 180
-    painel localOpen = falso
+    -- ===================== Scripts Side Panel (modelo do usuário) =====================
+    local panelWidth = 180
+    local panelOpen = false
 
     local scriptsPanel = Instance.new("Frame")
     scriptsPanel.Name = "ScriptsPanel"
@@ -289,7 +289,7 @@ função ElixirLib:MakeWindow(info)
         0,
         main.AbsolutePosition.X + main.AbsoluteSize.X + 4,
         0,
-        principal.PosiçãoAbsoluta.Y
+        main.AbsolutePosition.Y
     )
     scriptsPanel.ZIndex = 5
 
@@ -297,23 +297,23 @@ função ElixirLib:MakeWindow(info)
 
     local panelStroke = Instance.new("UIStroke")
     panelStroke.Parent = scriptsPanel
-    panelStroke.Color = Tema.MainUIStroke
+    panelStroke.Color = Theme.MainUIStroke
 
     -- Atualiza posição/tamanho caso a janela seja movida/redimensionada
-    RunService.RenderStepped:Connect(função()
+    RunService.RenderStepped:Connect(function()
         scriptsPanel.Position = UDim2.new(
             0,
             main.AbsolutePosition.X + main.AbsoluteSize.X + 4,
             0,
-            principal.PosiçãoAbsoluta.Y
+            main.AbsolutePosition.Y
         )
 
-        se o painel não estiver aberto, então
+        if not panelOpen then
             scriptsPanel.Size = UDim2.new(0, 0, 0, main.AbsoluteSize.Y)
-        outro
+        else
             scriptsPanel.Size = UDim2.new(0, panelWidth, 0, main.AbsoluteSize.Y)
-        fim
-    fim)
+        end
+    end)
 
     --------------------------------------------------------
 
@@ -324,25 +324,25 @@ função ElixirLib:MakeWindow(info)
     panelTitle.Text = "Scripts"
     panelTitle.Font = Enum.Font.GothamBold
     panelTitle.TextSize = 14
-    panelTitle.TextColor3 = Tema.TabText
+    panelTitle.TextColor3 = Theme.TabText
     panelTitle.ZIndex = 6
 
     --------------------------------------------------------
 
-    lista local = Instance.new("ScrollingFrame")
-    lista.Pai = scriptPanel
-    lista.TransparênciaDeFundo = 1
-    lista.BorderSizePixel = 0
+    local list = Instance.new("ScrollingFrame")
+    list.Parent = scriptsPanel
+    list.BackgroundTransparency = 1
+    list.BorderSizePixel = 0
     list.Position = UDim2.new(0,5,0,35)
     list.Size = UDim2.new(1,-10,1,-40)
     list.ScrollBarThickness = 3
-    list.ScrollBarImageColor3 = Tema.Destaque
+    list.ScrollBarImageColor3 = Theme.Highlight
     list.AutomaticCanvasSize = Enum.AutomaticSize.Y
     list.CanvasSize = UDim2.new(0,0,0,0)
     list.ZIndex = 6
 
-    layout local = Instance.new("UIListLayout")
-    layout.Parent = lista
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = list
     layout.Padding = UDim.new(0,5)
 
     --------------------------------------------------------
@@ -355,7 +355,7 @@ função ElixirLib:MakeWindow(info)
     arrowButton.Text = ">"
     arrowButton.Font = Enum.Font.GothamBold
     arrowButton.TextSize = 16
-    arrowButton.TextColor3 = Tema.TabText
+    arrowButton.TextColor3 = Theme.TabText
     arrowButton.BorderSizePixel = 0
     arrowButton.ZIndex = 10
 
@@ -363,9 +363,9 @@ função ElixirLib:MakeWindow(info)
 
     local arrowStroke = Instance.new("UIStroke")
     arrowStroke.Parent = arrowButton
-    arrowStroke.Color = Tema.MainUIStroke
+    arrowStroke.Color = Theme.MainUIStroke
 
-    RunService.RenderStepped:Connect(função()
+    RunService.RenderStepped:Connect(function()
         arrowButton.Position = UDim2.new(
             0,
             main.AbsolutePosition.X + main.AbsoluteSize.X - 10,
@@ -375,254 +375,254 @@ função ElixirLib:MakeWindow(info)
 
         arrowButton.Visible = main.Visible
 
-        se não main.Visible então
+        if not main.Visible then
             scriptsPanel.Visible = false
-        outro
+        else
             scriptsPanel.Visible = true
-        fim
-    fim)
+        end
+    end)
 
     --------------------------------------------------------
 
-    função local ToggleScriptsPanel()
-        panelOpen = não panelOpen
+    local function ToggleScriptsPanel()
+        panelOpen = not panelOpen
 
-        TweenService:Criar(
-            Painel de scripts,
+        TweenService:Create(
+            scriptsPanel,
             TweenInfo.new(.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
             {
-                Tamanho = UDim2.new(0, panelOpen and panelWidth or 0, 0, main.AbsoluteSize.Y)
+                Size = UDim2.new(0, panelOpen and panelWidth or 0, 0, main.AbsoluteSize.Y)
             }
-        ):Jogar()
+        ):Play()
 
-        arrowButton.Text = panelOpen e "<" ou ">"
-    fim
+        arrowButton.Text = panelOpen and "<" or ">"
+    end
 
     arrowButton.MouseButton1Click:Connect(ToggleScriptsPanel)
 
     --------------------------------------------------------
-    -- API pública do painel lateral, exibida via Window:MakeSidePanel({Name=...})
+    -- API pública do painel lateral, exposta via Window:MakeSidePanel({Name=...})
 
-    função local novoBotãoPainelLado(opt)
-        opt = opt ou {}
-        local btnName = opt.Name ou "Botão"
-        local callback = opt.Callback ou function() fim
+    local function newSidePanelButton(opt)
+        opt = opt or {}
+        local btnName = opt.Name or "Button"
+        local callback = opt.Callback or function() end
 
-        botão local = Instance.new("TextButton")
-        botão.Pai = lista
-        botão.Tamanho = UDim2.novo(1,-2,0,28)
-        botão.BackgroundColor3 = Tema.ItemFrame
-        botão.Texto = nomeDoBotão
-        botão.Fonte = Enum.Fonte.GothamBold
-        botão.TamanhoDoTexto = 12
-        botão.TextColor3 = Tema.ItemText
-        botão.TamanhoDaBordaPixel = 0
-        botão.AutoButtonColor = falso
-        botão.ZIndex = 6
+        local button = Instance.new("TextButton")
+        button.Parent = list
+        button.Size = UDim2.new(1,-2,0,28)
+        button.BackgroundColor3 = Theme.ItemFrame
+        button.Text = btnName
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 12
+        button.TextColor3 = Theme.ItemText
+        button.BorderSizePixel = 0
+        button.AutoButtonColor = false
+        button.ZIndex = 6
 
-        makeCorner(botão, 4)
+        makeCorner(button, 4)
 
         local stroke = Instance.new("UIStroke")
-        stroke.Parent = botão
-        stroke.Color = Tema.ItemUIStroke
+        stroke.Parent = button
+        stroke.Color = Theme.ItemUIStroke
 
-        botão.MouseEnter:Conectar(função()
+        button.MouseEnter:Connect(function()
             TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.HoverItemFrame}):Play()
-        fim)
-        botão.MouseLeave:Conectar(função()
+        end)
+        button.MouseLeave:Connect(function()
             TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.ItemFrame}):Play()
-        fim)
+        end)
 
-        botão.MouseButton1Click:Conectar(função()
-            tarefa.spawn(callback)
-        fim)
+        button.MouseButton1Click:Connect(function()
+            task.spawn(callback)
+        end)
 
-        retornar {
-            Pressionar = function() task.spawn(callback) fim,
+        return {
+            Press = function() task.spawn(callback) end,
             SetText = function(newText) button.Text = tostring(newText) end,
-            Destruir = botão function():Destruir() fim
+            Destroy = function() button:Destroy() end
         }
-    fim
+    end
 
     local sidePanelAPI = {}
-    função sidePanelAPI:AddButton(opt)
-        retornar novoBotãoPainelLado(opt)
-    fim
-    função sidePanelAPI:Limpar()
-        para _, v em ipairs(list:GetChildren()) faça
-            se v:IsA("TextButton") então v:Destroy() fim
-        fim
-    fim
-    função sidePanelAPI:SetTitle(novoTítulo)
+    function sidePanelAPI:AddButton(opt)
+        return newSidePanelButton(opt)
+    end
+    function sidePanelAPI:Clear()
+        for _, v in ipairs(list:GetChildren()) do
+            if v:IsA("TextButton") then v:Destroy() end
+        end
+    end
+    function sidePanelAPI:SetTitle(newTitle)
         panelTitle.Text = tostring(newTitle)
-    fim
-    função sidePanelAPI:Open()
-        se não panelOpen então ToggleScriptsPanel() fim
-    fim
-    função sidePanelAPI:Fechar()
-        se panelOpen então ToggleScriptsPanel() fim
-    fim
+    end
+    function sidePanelAPI:Open()
+        if not panelOpen then ToggleScriptsPanel() end
+    end
+    function sidePanelAPI:Close()
+        if panelOpen then ToggleScriptsPanel() end
+    end
 
-    função windowObj:MakeSidePanel(info)
-        informação = informação ou {}
-        panelTitle.Text = info.Name ou "Scripts"
-        retornar sidePanelAPI
-    fim
-    -- ===================== Painel Lateral fim =====================
+    function windowObj:MakeSidePanel(info)
+        info = info or {}
+        panelTitle.Text = info.Name or "Scripts"
+        return sidePanelAPI
+    end
+    -- ===================== fim Side Panel =====================
 
-    -- Golpe principal
+    -- Main stroke
 local mainStroke = Instance.new("UIStroke", main)
-mainStroke.Color = Tema.MainUIStroke
+mainStroke.Color = Theme.MainUIStroke
 
 -- altura da Topbar
-altura da barra superior local = 30
+local topbarHeight = 30
 
--- contêiner de guias esquerdas (corrigido)
-local tabContainer = novo("Frame", {
-    Pai = principal,
+-- left tabs container (corrigido)
+local tabContainer = new("Frame", {
+    Parent = main,
     BackgroundColor3 = Theme.TabContainer,
-    Tamanho = UDim2.new(0, 131, 0, 316),
-    Position = UDim2.new(0, 6, 0, topbarHeight + 6), -- fica logo abaixo da barra superior
-    Tamanho da BordaPixel = 0
+    Size = UDim2.new(0, 131, 0, 316),
+    Position = UDim2.new(0, 6, 0, topbarHeight + 6), -- fica logo abaixo da topbar
+    BorderSizePixel = 0
 })
 makeCorner(tabContainer, 4)
 
 local tabContainerLine = new("Frame", {
-    Pai = tabContainer,
-    BackgroundColor3 = Tema.Linhas,
-    Tamanho = UDim2.new(1, 0, 0, 1),
-    Posição = UDim2.new(0, 0, 0, 0),
-    Tamanho da BordaPixel = 0
+    Parent = tabContainer,
+    BackgroundColor3 = Theme.Lines,
+    Size = UDim2.new(1, 0, 0, 1),
+    Position = UDim2.new(0, 0, 0, 0),
+    BorderSizePixel = 0
 })
 
 
-    -- rolagem por tabulação
+    -- tab scrolling
     local tabScroll = new("ScrollingFrame", {
-        Pai = tabContainer,
+        Parent = tabContainer,
         BackgroundTransparency = 1,
-        TamanhoBordaPixel = 0,
-        Tamanho = UDim2.new(1,0,1,0),
-        Posição = UDim2.new(0,0,0,6),
-        Espessura da barra de rolagem = 0,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1,0,1,0),
+        Position = UDim2.new(0,0,0,6),
+        ScrollBarThickness = 0,
         AutomaticCanvasSize = Enum.AutomaticSize.Y
     })
     local tabListLayout = new("UIListLayout", { Parent = tabScroll })
     tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     tabListLayout.Padding = UDim.new(0,6)
 
-    -- área de conteúdo direita
-    conteúdo local = novo("Frame", {
-        Pai = principal,
+    -- right content area
+    local content = new("Frame", {
+        Parent = main,
         BackgroundColor3 = Theme.ContainerHolder,
-        Tamanho = UDim2.new(0,368,0,316),
-        Posição = UDim2.new(0.262,1,0.097,0),
-        Tamanho da BordaPixel = 0
+        Size = UDim2.new(0,368,0,316),
+        Position = UDim2.new(0.262,1,0.097,0),
+        BorderSizePixel = 0
     })
     makeCorner(content, 4)
 
-    -- área de contêiner onde cada aba adiciona seu conteúdo
-    contêineres locais = novo("Frame", {
-        Pai = conteúdo,
+    -- container area where each tab adds its content
+    local containers = new("Frame", {
+        Parent = content,
         BackgroundTransparency = 1,
-        Tamanho = UDim2.new(1,0,1,0)
+        Size = UDim2.new(1,0,1,0)
     })
 
-    -- contabilidade
-    tabulações locais = {}
-    ID da aba selecionada local
+    -- bookkeeping
+    local tabs = {}
+    local selectedTabId
 
-    -- ajuste dinâmico do layout quando redimensionar
-    RunService.RenderStepped:Connect(função()
-        tamanho local X = main.Tamanho.X.Deslocamento
-        tamanho local Y = main.Tamanho.Y.Deslocamento
+    -- ajuste dinÃ¢mico do layout quando redimensionar
+    RunService.RenderStepped:Connect(function()
+        local sizeX = main.Size.X.Offset
+        local sizeY = main.Size.Y.Offset
 
         tabContainer.Size = UDim2.new(0, math.clamp(sizeX * 0.26, 120, 180), 0, sizeY - 34)
         content.Size = UDim2.new(0, sizeX - tabContainer.Size.X.Offset - 20, 0, sizeY - 34)
         content.Position = UDim2.new(0, tabContainer.Size.X.Offset + 12, 0, 34)
-    fim)
+    end)
 
-    -- função de tabulação de seleção
-    função local selectTab(id)
-        se selectedTabId e tabs[selectedTabId] então
-            local antigo = tabs[selectedTabId]
-            old._button.BackgroundColor3 = Tema.TabFrame
-            old._name.TextColor3 = Tema.TabText
-            Se old._content então old._content.Visible = falso fim
-        fim
+    -- select tab function
+    local function selectTab(id)
+        if selectedTabId and tabs[selectedTabId] then
+            local old = tabs[selectedTabId]
+            old._button.BackgroundColor3 = Theme.TabFrame
+            old._name.TextColor3 = Theme.TabText
+            if old._content then old._content.Visible = false end
+        end
         selectedTabId = id
         local cur = tabs[id]
         cur._button.BackgroundColor3 = Theme.SelectedTabFrame
-        cur._name.TextColor3 = Tema.TabText
-        se cur._content então cur._content.Visible = true fim
-    fim
+        cur._name.TextColor3 = Theme.TabText
+        if cur._content then cur._content.Visible = true end
+    end
 
-    -- objeto de janela retornado
-    -- Implementação do MakeTab
-    função windowObj:MakeTab(tabInfo)
-        tabInfo = tabInfo ou {}
-        nome local = tabInfo.Name ou "Aba"
-        local iconId = tabInfo.Icon ou tabInfo.IconId ou ""
+    -- returned window object
+    -- MakeTab implementation
+    function windowObj:MakeTab(tabInfo)
+        tabInfo = tabInfo or {}
+        local name = tabInfo.Name or "Tab"
+        local iconId = tabInfo.Icon or tabInfo.IconId or ""
 
         -- suporte ao formato "Nome @AssetId"
-        se string.find(name, "@") então
-            partes locais = string.split(nome, "@")
-            nome = string.gsub(partes[1], "%s+$", "")
+        if string.find(name, "@") then
+            local parts = string.split(name, "@")
+            name = string.gsub(parts[1], "%s+$", "")
             iconId = "rbxassetid://" .. tostring(parts[2]):gsub("%s+", "")
-        fim
+        end
 
-        id local = HttpService:GenerateGUID(false)
+        local id = HttpService:GenerateGUID(false)
 
-        -- moldura de suporte de abas (para espaçamento)
-        local tabHolder = novo("Frame", {
-            Pai = tabScroll,
+        -- tab holder frame (for spacing)
+        local tabHolder = new("Frame", {
+            Parent = tabScroll,
             BackgroundTransparency = 1,
-            Tamanho = UDim2.new(1,-8,0,29)
+            Size = UDim2.new(1,-8,0,29)
         })
 
-        local tabFrame = novo("Frame", {
-            Pai = tabHolder,
+        local tabFrame = new("Frame", {
+            Parent = tabHolder,
             BackgroundColor3 = Theme.TabFrame,
-            Tamanho = UDim2.new(1,0,1,0),
-            Tamanho da BordaPixel = 0
+            Size = UDim2.new(1,0,1,0),
+            BorderSizePixel = 0
         })
         makeCorner(tabFrame, 4)
 
-        ícone local = novo("ImageLabel", {
-            Pai = tabFrame,
-            Tamanho = UDim2.new(0,20,0,20),
-            Posição = UDim2.new(0,16,0.5,-10),
+        local icon = new("ImageLabel", {
+            Parent = tabFrame,
+            Size = UDim2.new(0,20,0,20),
+            Position = UDim2.new(0,16,0.5,-10),
             BackgroundTransparency = 1,
-            Imagem = iconId ou ""
+            Image = iconId or ""
         })
 
         local tabName = new("TextLabel", {
-            Pai = tabFrame,
-            Texto = nome,
-            Fonte = Enum.Font.GothamBold,
-            Tamanho do texto = 12,
-            TextColor3 = Tema.TabText,
+            Parent = tabFrame,
+            Text = name,
+            Font = Enum.Font.GothamBold,
+            TextSize = 12,
+            TextColor3 = Theme.TabText,
             BackgroundTransparency = 1,
-            Posição = UDim2.new(0,45,0,0),
-            Tamanho = UDim2.new(1,-45,1,0),
-            TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+            Position = UDim2.new(0,45,0,0),
+            Size = UDim2.new(1,-45,1,0),
+            TextXAlignment = Enum.TextXAlignment.Left
         })
 
-        botão local = novo("TextButton", {
-            Pai = tabFrame,
+        local button = new("TextButton", {
+            Parent = tabFrame,
             BackgroundTransparency = 1,
-            Tamanho = UDim2.new(1,0,1,0),
-            Texto = ""
+            Size = UDim2.new(1,0,1,0),
+            Text = ""
         })
 
-        -- quadro de rolagem de conteúdo para esta aba
+        -- content scrolling frame for this tab
         local tabContent = new("ScrollingFrame", {
-            Pai = contêineres,
+            Parent = containers,
             BackgroundTransparency = 1,
-            TamanhoBordaPixel = 0,
-            Tamanho = UDim2.new(1,0,1,0),
+            BorderSizePixel = 0,
+            Size = UDim2.new(1,0,1,0),
             CanvasSize = UDim2.new(0,0,0,0),
-            Espessura da barra de rolagem = 0,
-            Visível = falso,
+            ScrollBarThickness = 0,
+            Visible = false,
             AutomaticCanvasSize = Enum.AutomaticSize.Y
         })
         local contentLayout = new("UIListLayout", { Parent = tabContent })
@@ -632,935 +632,935 @@ local tabContainerLine = new("Frame", {
 
         tabs[id] = { _button = tabFrame, _name = tabName, _content = tabContent }
 
-        -- efeitos de foco
+        -- hover effects
         tabFrame.MouseEnter:Connect(function()
-            se selectedTabId ~= id então
+            if selectedTabId ~= id then
                 TweenService:Create(tabFrame, TweenInfo.new(.12), {BackgroundColor3 = Theme.HoverTabFrame}):Play()
-            fim
-        fim)
+            end
+        end)
         tabFrame.MouseLeave:Connect(function()
-            se selectedTabId ~= id então
+            if selectedTabId ~= id then
                 TweenService:Create(tabFrame, TweenInfo.new(.12), {BackgroundColor3 = Theme.TabFrame}):Play()
-            fim
-        fim)
+            end
+        end)
 
-        botão.MouseButton1Click:Conectar(function() selecionarTab(id) fim)
-        se não selectedTabId então selectTab(id) fim
+        button.MouseButton1Click:Connect(function() selectTab(id) end)
+        if not selectedTabId then selectTab(id) end
 
-        -- auxiliar para criar contêiner de itens dentro da aba
-        função local novoItemFrame()
-            item local = novo("Frame", {
-                Pai = conteúdo da aba,
+        -- helper to create item container inside tab
+        local function newItemFrame()
+            local item = new("Frame", {
+                Parent = tabContent,
                 BackgroundColor3 = Theme.ItemFrame,
-                Tamanho = UDim2.new(1,-12,0,30),
-                Tamanho da BordaPixel = 0
+                Size = UDim2.new(1,-12,0,30),
+                BorderSizePixel = 0
             })
             makeCorner(item, 4)
             local stroke = Instance.new("UIStroke", item)
-            stroke.Color = Tema.ItemUIStroke
-            item.MouseEnter:Conectar(função()
+            stroke.Color = Theme.ItemUIStroke
+            item.MouseEnter:Connect(function()
                 TweenService:Create(item, TweenInfo.new(.12), {BackgroundColor3 = Theme.HoverItemFrame}):Play()
-            fim)
+            end)
             item.MouseLeave:Connect(function()
                 TweenService:Create(item, TweenInfo.new(.12), {BackgroundColor3 = Theme.ItemFrame}):Play()
-            fim)
-            devolver item
-        fim
+            end)
+            return item
+        end
 
 
-        -- A API retornou por aba
+        -- API returned per tab
         local tabAPI = {}
 
-função tabAPI:AdicionarAlternância(opcional)
-    opt = opt ou {}
-    nome local = opt.Name ou "Alternar"
-    local default = opt.Default ou falso
-    local callback = opt.Callback ou function() fim
-    flag local = opt.Flag ou HttpService:GenerateGUID(false)
-    ElixirLib.Flags[flag] = padrão
+function tabAPI:AddToggle(opt)
+    opt = opt or {}
+    local name = opt.Name or "Toggle"
+    local default = opt.Default or false
+    local callback = opt.Callback or function() end
+    local flag = opt.Flag or HttpService:GenerateGUID(false)
+    ElixirLib.Flags[flag] = default
 
-    item local = novoItemFrame()
+    local item = newItemFrame()
     item.Size = UDim2.new(1, -12, 0, 30)
 
-    rótulo local = novo("TextLabel", {
-        Pai = item,
-        Texto = nome,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.ItemText,
+    local label = new("TextLabel", {
+        Parent = item,
+        Text = name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.ItemText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0, 8, 0, 0),
-        Tamanho = UDim2.new(0.7, -8, 1, 0),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+        Position = UDim2.new(0, 8, 0, 0),
+        Size = UDim2.new(0.7, -8, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    local outer = novo("Frame", {
-        Pai = item,
-        BackgroundColor3 = Tema.AlternarExterno,
-        Tamanho = UDim2.new(0, 38, 0, 20),
-        Posição = UDim2.new(1, -46, 0.5, -10),
-        Tamanho da BordaPixel = 0
+    local outer = new("Frame", {
+        Parent = item,
+        BackgroundColor3 = Theme.ToggleOuter,
+        Size = UDim2.new(0, 38, 0, 20),
+        Position = UDim2.new(1, -46, 0.5, -10),
+        BorderSizePixel = 0
     })
     makeCorner(outer, 4)
 
     local stroke = Instance.new("UIStroke", outer)
-    stroke.Color = Tema.AlternarTraçoExternoUI
+    stroke.Color = Theme.ToggleOuterUIStroke
 
-    local inner = novo("Frame", {
-        Pai = externo,
-        BackgroundColor3 = padrão e Theme.ToggleInnerEnabled ou Theme.ToggleInner,
-        Tamanho = UDim2.new(0, 16, 0, 16),
-        Posição = padrão e UDim2.new(1, -18, 0.5, -8) ou UDim2.new(0, 2, 0.5, -8),
-        Tamanho da BordaPixel = 0
+    local inner = new("Frame", {
+        Parent = outer,
+        BackgroundColor3 = default and Theme.ToggleInnerEnabled or Theme.ToggleInner,
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = default and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+        BorderSizePixel = 0
     })
-    makeCorner(interno, 100)
+    makeCorner(inner, 100)
 
-    função local setState(estado, ncb)
-        ElixirLib.Flags[flag] = estado
-        local toPos = state e UDim2.new(1, -18, 0.5, -8) ou UDim2.new(0, 2, 0.5, -8)
+    local function setState(state, ncb)
+        ElixirLib.Flags[flag] = state
+        local toPos = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
         TweenService:Create(inner, TweenInfo.new(.12), {Position = toPos}):Play()
         TweenService:Create(inner, TweenInfo.new(.12), {BackgroundColor3 = state and Theme.ToggleInnerEnabled or Theme.ToggleInner}):Play()
-        se não ncb então task.spawn(callback, state) fim
-    fim
+        if not ncb then task.spawn(callback, state) end
+    end
 
     item.InputBegan:Connect(function(input)
-        se input.UserInputType == Enum.UserInputType.MouseButton1
-        ou input.UserInputType == Enum.UserInputType.Touch então
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
             setState(not ElixirLib.Flags[flag])
-        fim
-    fim)
+        end
+    end)
 
-    setState(padrão, verdadeiro)
+    setState(default, true)
 
-    retornar {
-        Conjunto = função(v) definirEstado(não não v) fim,
-        Obter = função() retorna ElixirLib.Flags[flag] fim,
-        Bandeira = bandeira
+    return {
+        Set = function(v) setState(not not v) end,
+        Get = function() return ElixirLib.Flags[flag] end,
+        Flag = flag
     }
-fim
+end
 
 
         
 
-        -- Botão Adicionar
-        função tabAPI:AddButton(opt)
-            opt = opt ou {}
-            nome local = opt.Name ou "Botão"
-            local callback = opt.Callback ou function() fim
+        -- AddButton
+        function tabAPI:AddButton(opt)
+            opt = opt or {}
+            local name = opt.Name or "Button"
+            local callback = opt.Callback or function() end
 
-            item local = novoItemFrame()
+            local item = newItemFrame()
             item.Size = UDim2.new(1,-12,0,30)
-            rótulo local = novo("TextLabel", {
-                Pai = item,
-                Texto = nome,
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.ItemText,
+            local label = new("TextLabel", {
+                Parent = item,
+                Text = name,
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.ItemText,
                 BackgroundTransparency = 1,
-                Posição = UDim2.new(0,8,0,0),
-                Tamanho = UDim2.new(0.7,-8,1,0),
-                TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+                Position = UDim2.new(0,8,0,0),
+                Size = UDim2.new(0.7,-8,1,0),
+                TextXAlignment = Enum.TextXAlignment.Left
             })
 
-            botão local = novo("TextButton", {
-                Pai = item,
-                Texto = "Executar",
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.SectionText,
+            local button = new("TextButton", {
+                Parent = item,
+                Text = "Execute",
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.SectionText,
                 BackgroundColor3 = Theme.SelectedTabFrame,
-                Tamanho = UDim2.new(0,90,0,22),
-                Posição = UDim2.new(1,-104,0.5,-11),
-                Tamanho da BordaPixel = 0
+                Size = UDim2.new(0,90,0,22),
+                Position = UDim2.new(1,-104,0.5,-11),
+                BorderSizePixel = 0
             })
-            makeCorner(botão, 4)
+            makeCorner(button, 4)
             local btnStroke = Instance.new("UIStroke", button)
-            btnStroke.Color = Tema.MainUIStroke
+            btnStroke.Color = Theme.MainUIStroke
 
-            botão.MouseEnter:Conectar(função()
+            button.MouseEnter:Connect(function()
                 TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.Highlight}):Play()
-            fim)
-            botão.MouseLeave:Conectar(função()
+            end)
+            button.MouseLeave:Connect(function()
                 TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.SelectedTabFrame}):Play()
-            fim)
+            end)
 
-            botão.MouseButton1Click:Conectar(função()
-                tarefa.spawn(callback)
-            fim)
+            button.MouseButton1Click:Connect(function()
+                task.spawn(callback)
+            end)
 
-            retornar {
-                Pressionar = função() tarefa.spawn(callback) fim
+            return {
+                Press = function() task.spawn(callback) end
             }
-        fim
+        end
 
         -- AddSlider (corrigido e com suporte mobile)
-função tabAPI:AdicionarSlider(opcional)
-    opt = opt ou {}
-    nome local = opt.Name ou "Slider"
-    local min = opt.Min ou 0
-    local max = opt.Max ou 100
-    padrão local = math.clamp(opt.Default ou min, min, max)
-    local callback = opt.Callback ou function() fim
-    flag local = opt.Flag ou HttpService:GenerateGUID(false)
+function tabAPI:AddSlider(opt)
+    opt = opt or {}
+    local name = opt.Name or "Slider"
+    local min = opt.Min or 0
+    local max = opt.Max or 100
+    local default = math.clamp(opt.Default or min, min, max)
+    local callback = opt.Callback or function() end
+    local flag = opt.Flag or HttpService:GenerateGUID(false)
 
-    ElixirLib.Flags[flag] = padrão
+    ElixirLib.Flags[flag] = default
 
-    item local = novo("Frame", {
-        Pai = conteúdo da aba,
+    local item = new("Frame", {
+        Parent = tabContent,
         BackgroundColor3 = Theme.ItemFrame,
-        Size = UDim2.new(1,-12,0,52), -- um pouco mais alto pra acomodação o valor
-        Tamanho da BordaPixel = 0
+        Size = UDim2.new(1,-12,0,52), -- um pouco mais alto pra acomodar o valor
+        BorderSizePixel = 0
     })
     makeCorner(item, 4)
     local stroke = Instance.new("UIStroke", item)
-    stroke.Color = Tema.ItemUIStroke
+    stroke.Color = Theme.ItemUIStroke
 
-    rótulo local = novo("TextLabel", {
-        Pai = item,
-        Texto = nome,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.ItemText,
+    local label = new("TextLabel", {
+        Parent = item,
+        Text = name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.ItemText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,8,0,2),
-        Tamanho = UDim2.new(1,-16,0,18),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+        Position = UDim2.new(0,8,0,2),
+        Size = UDim2.new(1,-16,0,18),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
     -- valor agora fica acima da linha
     local valLabel = new("TextLabel", {
-        Pai = item,
-        Texto = tostring(padrão),
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.ItemText,
+        Parent = item,
+        Text = tostring(default),
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.ItemText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,8,0,18),
-        Tamanho = UDim2.new(1,-16,0,16),
-        TextXAlinhamento = Enum.TextXAlinhamento.Direito
+        Position = UDim2.new(0,8,0,18),
+        Size = UDim2.new(1,-16,0,16),
+        TextXAlignment = Enum.TextXAlignment.Right
     })
 
-    -- linha deslizante mais abaixo, pra não sobrepor o número
-    local outer = novo("Frame", {
-        Pai = item,
+    -- slider line mais abaixo, pra nÃ£o sobrepor o nÃºmero
+    local outer = new("Frame", {
+        Parent = item,
         BackgroundColor3 = Theme.SliderOuter,
-        Tamanho = UDim2.new(1,-24,0,6),
-        Posição = UDim2.new(0,12,0,36),
-        Tamanho da BordaPixel = 0
+        Size = UDim2.new(1,-24,0,6),
+        Position = UDim2.new(0,12,0,36),
+        BorderSizePixel = 0
     })
     makeCorner(outer, 100)
 
-    local inner = novo("Frame", {
-        Pai = externo,
+    local inner = new("Frame", {
+        Parent = outer,
         BackgroundColor3 = Theme.SliderInner,
-        Tamanho = UDim2.new((padrão - mínimo)/(máximo - mínimo),0,0,6),
-        Tamanho da BordaPixel = 0
+        Size = UDim2.new((default - min)/(max - min),0,0,6),
+        BorderSizePixel = 0
     })
-    makeCorner(interno, 100)
+    makeCorner(inner, 100)
 
     local knob = new("ImageLabel", {
-        Pai = externo,
-        Imagem = "",
-        BackgroundColor3 = Tema.ItemText,
-        Tamanho = UDim2.new(0,12,0,12),
-        Posição = UDim2.new((padrão - mínimo)/(máximo - mínimo), -6, 0.5, -6),
+        Parent = outer,
+        Image = "",
+        BackgroundColor3 = Theme.ItemText,
+        Size = UDim2.new(0,12,0,12),
+        Position = UDim2.new((default - min)/(max - min), -6, 0.5, -6),
         BackgroundTransparency = 0
     })
-    makeCorner(botão, 100)
+    makeCorner(knob, 100)
 
-    -- lógica de prender
-    arrastar local = falso
-    função local updateFromInput(posição)
+    -- lÃ³gica de arraste
+    local dragging = false
+    local function updateFromInput(position)
         local absPos = outer.AbsolutePosition.X
         local absSize = outer.AbsoluteSize.X
         local px = math.clamp((position.X - absPos) / absSize, 0, 1)
-        valor local = math.floor(min + (max - min) * px + 0.5)
-        ElixirLib.Flags[flag] = valor
+        local value = math.floor(min + (max - min) * px + 0.5)
+        ElixirLib.Flags[flag] = value
         inner.Size = UDim2.new(px,0,0,6)
         knob.Position = UDim2.new(px, -6, 0.5, -6)
         valLabel.Text = tostring(value)
-        tarefa.spawn(callback, valor)
-    fim
+        task.spawn(callback, value)
+    end
 
-    função local stopDrag()
-        arrastar = falso
-    fim
+    local function stopDrag()
+        dragging = false
+    end
 
     knob.InputBegan:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            arrastar = verdadeiro
-            atualizarDaEntrada(entrada.Posição)
-        fim
-    fim)
-    knob.InputEnded:Conectar(função(entrada)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            pararArrastar()
-        fim
-    fim)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            updateFromInput(input.Position)
+        end
+    end)
+    knob.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            stopDrag()
+        end
+    end)
     outer.InputBegan:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            atualizarDaEntrada(entrada.Posição)
-            arrastar = verdadeiro
-        fim
-    fim)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            updateFromInput(input.Position)
+            dragging = true
+        end
+    end)
     UserInputService.InputChanged:Connect(function(input)
-        se arrastar e (input.UserInputType == Enum.UserInputType.MouseMovement ou input.UserInputType == Enum.UserInputType.Touch) então
-            atualizarDaEntrada(entrada.Posição)
-        fim
-    fim)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateFromInput(input.Position)
+        end
+    end)
     UserInputService.InputEnded:Connect(function(input)
-        Se input.UserInputType == Enum.UserInputType.MouseButton1 ou input.UserInputType == Enum.UserInputType.Touch então
-            pararArrastar()
-        fim
-    fim)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            stopDrag()
+        end
+    end)
 
-    -- inicializar
-    fazer
-        local p = (padrão - mínimo)/(máximo - mínimo)
+    -- init
+    do
+        local p = (default - min)/(max - min)
         inner.Size = UDim2.new(p,0,0,6)
         knob.Position = UDim2.new(p,-6,0.5,-6)
-    fim
+    end
 
-    retornar {
-        Conjunto = função(v)
+    return {
+        Set = function(v) 
             v = math.clamp(v, min, max)
             ElixirLib.Flags[flag] = v
             local p = (v - min)/(max - min)
             TweenService:Create(inner, TweenInfo.new(.12), {Size = UDim2.new(p,0,0,6)}):Play()
             TweenService:Create(knob, TweenInfo.new(.12), {Position = UDim2.new(p,-6,0.5,-6)}):Play()
             valLabel.Text = tostring(v)
-        fim,
-        Obter = função() retorna ElixirLib.Flags[flag] fim,
-        Bandeira = bandeira
+        end,
+        Get = function() return ElixirLib.Flags[flag] end,
+        Flag = flag
     }
-fim
+end
 
 
         -- AddInput
-        função tabAPI:AdicionarEntrada(opcional)
-            opt = opt ou {}
-            nome local = opt.Name ou "Entrada"
-            local placeholder = opt.Placeholder ou ""
-            local callback = opt.Callback ou function() fim
-            flag local = opt.Flag ou HttpService:GenerateGUID(false)
+        function tabAPI:AddInput(opt)
+            opt = opt or {}
+            local name = opt.Name or "Input"
+            local placeholder = opt.Placeholder or ""
+            local callback = opt.Callback or function() end
+            local flag = opt.Flag or HttpService:GenerateGUID(false)
 
-            item local = novo("Frame", {
-                Pai = conteúdo da aba,
+            local item = new("Frame", {
+                Parent = tabContent,
                 BackgroundColor3 = Theme.ItemFrame,
-                Tamanho = UDim2.new(1,-12,0,34),
-                Tamanho da BordaPixel = 0
+                Size = UDim2.new(1,-12,0,34),
+                BorderSizePixel = 0
             })
             makeCorner(item, 4)
             local stroke = Instance.new("UIStroke", item)
-            stroke.Color = Tema.ItemUIStroke
+            stroke.Color = Theme.ItemUIStroke
 
-            rótulo local = novo("TextLabel", {
-                Pai = item,
-                Texto = nome,
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.ItemText,
+            local label = new("TextLabel", {
+                Parent = item,
+                Text = name,
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.ItemText,
                 BackgroundTransparency = 1,
-                Posição = UDim2.new(0,8,0,0),
-                Tamanho = UDim2.new(0.35, -8,0,18),
-                TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+                Position = UDim2.new(0,8,0,0),
+                Size = UDim2.new(0.35, -8,0,18),
+                TextXAlignment = Enum.TextXAlignment.Left
             })
 
             local textbox = new("TextBox", {
-                Pai = item,
-                Texto = "",
-                Texto do espaço reservado = espaço reservado,
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.ItemText,
+                Parent = item,
+                Text = "",
+                PlaceholderText = placeholder,
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.ItemText,
                 PlaceholderColor3 = Theme.InputPlaceHolder,
                 BackgroundTransparency = 1,
-                Posição = UDim2.new(0.35,2,0,6),
-                Tamanho = UDim2.new(0.63,-10,0,22)
+                Position = UDim2.new(0.35,2,0,6),
+                Size = UDim2.new(0.63,-10,0,22)
             })
 
-            textbox.Focused:Connect(function()
-                stroke.Color = Tema.ItemUIStrokeSelected
-            fim)
+            textbox.Focused:Connect(function() 
+                stroke.Color = Theme.ItemUIStrokeSelected
+            end)
             textbox.FocusLost:Connect(function(enter)
-                stroke.Color = Tema.ItemUIStroke
+                stroke.Color = Theme.ItemUIStroke
                 ElixirLib.Flags[flag] = textbox.Text
-                tarefa.spawn(callback, textbox.Text)
-            fim)
+                task.spawn(callback, textbox.Text)
+            end)
 
-            retornar {
-                Obter = função() retorna ElixirLib.Flags[flag] fim,
-                Conjunto = função(v)
+            return {
+                Get = function() return ElixirLib.Flags[flag] end,
+                Set = function(v) 
                     ElixirLib.Flags[flag] = v
                     textbox.Text = tostring(v)
-                fim,
-                Bandeira = bandeira
+                end,
+                Flag = flag
             }
-        fim
+        end
 
-        --Suspenso
+        --Dropdown
 
-função tabAPI:AdicionarDropdown(opt)
-    opt = opt ou {}
+function tabAPI:AddDropdown(opt)
+    opt = opt or {}
 
-    nome local = opt.Name ou "Dropdown"
-    opções locais = opt.Options ou {}
-    local callback = opt.Callback ou function() fim
-    flag local = opt.Flag ou HttpService:GenerateGUID(false)
+    local name = opt.Name or "Dropdown"
+    local options = opt.Options or {}
+    local callback = opt.Callback or function() end
+    local flag = opt.Flag or HttpService:GenerateGUID(false)
 
-    -- DINÂMICO PADRÃO
-    padrão local = opt.Default ou opções[1]
-    ElixirLib.Flags[flag] = padrão
+    -- DEFAULT DINÃ‚MICO
+    local default = opt.Default or options[1]
+    ElixirLib.Flags[flag] = default
 
-    item local = novoItemFrame()
+    local item = newItemFrame()
     item.AutomaticSize = Enum.AutomaticSize.Y
 
-    -- ETIQUETA (NOME)
-    rótulo local = novo("TextLabel", {
-        Pai = item,
-        Texto = nome,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.ItemText,
+    -- LABEL (NAME)
+    local label = new("TextLabel", {
+        Parent = item,
+        Text = name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.ItemText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,8,0,0),
-        Tamanho = UDim2.new(0.45,-8,0,24),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+        Position = UDim2.new(0,8,0,0),
+        Size = UDim2.new(0.45,-8,0,24),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    -- TEXTO DO VALOR ATUAL
+    -- CURRENT VALUE TEXT
     local currentText = new("TextLabel", {
-        Pai = item,
-        Texto = padrão e tostring(padrão) ou "Vazio",
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.Destaque,
+        Parent = item,
+        Text = default and tostring(default) or "Empty",
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.Highlight,
         BackgroundTransparency = 1,
-        PontoAncora = Vector2.new(1,0),
-        Posição = UDim2.new(1,-12,0,0),
-        Tamanho = UDim2.new(0.45,0,0,24),
-        TextXAlinhamento = Enum.TextXAlinhamento.Direito
+        AnchorPoint = Vector2.new(1,0),
+        Position = UDim2.new(1,-12,0,0),
+        Size = UDim2.new(0.45,0,0,24),
+        TextXAlignment = Enum.TextXAlignment.Right
     })
 
-    -- QUADRO SUSPENSO
+    -- DROPDOWN FRAME
     local dropdownFrame = new("Frame", {
-        Pai = item,
+        Parent = item,
         BackgroundColor3 = Theme.ItemFrame,
-        TamanhoBordaPixel = 0,
-        Tamanho = UDim2.new(1,-12,0,0),
-        Posição = UDim2.new(0,6,0,24),
-        ClipsDescendants = verdadeiro
+        BorderSizePixel = 0,
+        Size = UDim2.new(1,-12,0,0),
+        Position = UDim2.new(0,6,0,24),
+        ClipsDescendants = true
     })
     makeCorner(dropdownFrame, 6)
 
-    -- QUADRO DE ROLAGEM
+    -- SCROLL FRAME
     local scrollFrame = new("ScrollingFrame", {
-        Pai = dropdownFrame,
+        Parent = dropdownFrame,
         BackgroundTransparency = 1,
-        Tamanho = UDim2.new(1,0,0,0),
+        Size = UDim2.new(1,0,0,0),
         CanvasSize = UDim2.new(0,0,0,0),
-        Espessura da barra de rolagem = 4,
-        ScrollBarImageColor3 = Tema.Destaque,
-        Visível = falso
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = Theme.Highlight,
+        Visible = false
     })
     makeCorner(scrollFrame, 6)
 
     local scrollList = new("UIListLayout", {
-        Pai = scrollFrame,
-        OrdemDeClassificação = Enum.OrdemDeClassificação.OrdemDeLayout,
-        Preenchimento = UDim.new(0,2)
+        Parent = scrollFrame,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0,2)
     })
 
-    novo("UIPadding", {
-        Pai = scrollFrame,
+    new("UIPadding", {
+        Parent = scrollFrame,
         PaddingTop = UDim.new(0,4),
         PaddingBottom = UDim.new(0,4),
         PaddingLeft = UDim.new(0,6),
         PaddingRight = UDim.new(0,6)
     })
 
-    local aberto = falso
+    local opened = false
 
     -------------------------------------------------
-    -- FECHAR / ABRIR
+    -- CLOSE / OPEN
     -------------------------------------------------
-    função local closeList()
-        aberto = falso
+    local function closeList()
+        opened = false
         TweenService:Create(scrollFrame, TweenInfo.new(.15), {
-            Tamanho = UDim2.new(1,0,0,0)
-        }):Jogar()
+            Size = UDim2.new(1,0,0,0)
+        }):Play()
         TweenService:Create(dropdownFrame, TweenInfo.new(.15), {
-            Tamanho = UDim2.new(1,-12,0,0)
-        }):Jogar()
-        tarefa.atraso(.15, função()
-            se não estiver aberto então
+            Size = UDim2.new(1,-12,0,0)
+        }):Play()
+        task.delay(.15, function()
+            if not opened then
                 scrollFrame.Visible = false
-            fim
-        fim)
-    fim
+            end
+        end)
+    end
 
-    função local openList()
-        se #opções == 0 então retorne fim
+    local function openList()
+        if #options == 0 then return end
 
-        aberto = verdadeiro
+        opened = true
         scrollFrame.Visible = true
 
-        altura total local = (#opções * 26) + 8
+        local totalHeight = (#options * 26) + 8
         scrollFrame.CanvasSize = UDim2.new(0,0,0,totalHeight)
 
         local visibleCount = math.min(#options, 5)
         TweenService:Create(scrollFrame, TweenInfo.new(.15), {
-            Tamanho = UDim2.new(1,0,0,contagemvisível*26)
-        }):Jogar()
+            Size = UDim2.new(1,0,0,visibleCount*26)
+        }):Play()
         TweenService:Create(dropdownFrame, TweenInfo.new(.15), {
-            Tamanho = UDim2.new(1,-12,0,(visibleCount*26)+4)
-        }):Jogar()
-    fim
+            Size = UDim2.new(1,-12,0,(visibleCount*26)+4)
+        }):Play()
+    end
 
     -------------------------------------------------
-    -- OPÇÕES DE RECONSTRUÇÃO (NÚCLEO)
+    -- REBUILD OPTIONS (CORE)
     -------------------------------------------------
-    função local rebuildOptions()
+    local function rebuildOptions()
         -- Limpa botÃµes antigos
-        para _, v em pares(scrollFrame:GetChildren()) faça
-            se v:IsA("TextButton") então
-                v:Destruir()
-            fim
-        fim
+        for _, v in pairs(scrollFrame:GetChildren()) do
+            if v:IsA("TextButton") then
+                v:Destroy()
+            end
+        end
 
         -- Cria novos
-        para _, optVal em ipairs(options) faça
+        for _, optVal in ipairs(options) do
             local btn = new("TextButton", {
-                Pai = scrollFrame,
-                Texto = tostring(optVal),
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.ItemText,
+                Parent = scrollFrame,
+                Text = tostring(optVal),
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.ItemText,
                 BackgroundColor3 = Theme.ItemFrame,
-                TamanhoBordaPixel = 0,
-                Tamanho = UDim2.new(1,0,0,24),
-                AutoButtonColor = falso
+                BorderSizePixel = 0,
+                Size = UDim2.new(1,0,0,24),
+                AutoButtonColor = false
             })
             makeCorner(btn, 4)
 
-            btn.MouseEnter:Conectar(função()
+            btn.MouseEnter:Connect(function()
                 TweenService:Create(btn, TweenInfo.new(.08), {
-                    BackgroundColor3 = Tema.Destaque,
+                    BackgroundColor3 = Theme.Highlight,
                     TextColor3 = Color3.new(1,1,1)
-                }):Jogar()
-            fim)
+                }):Play()
+            end)
 
-            btn.MouseLeave:Conectar(função()
+            btn.MouseLeave:Connect(function()
                 TweenService:Create(btn, TweenInfo.new(.08), {
                     BackgroundColor3 = Theme.ItemFrame,
-                    TextColor3 = Tema.ItemText
-                }):Jogar()
-            fim)
+                    TextColor3 = Theme.ItemText
+                }):Play()
+            end)
 
-            btn.Ativado:Conectar(função()
+            btn.Activated:Connect(function()
                 ElixirLib.Flags[flag] = optVal
                 currentText.Text = tostring(optVal)
-                tarefa.spawn(callback, optVal)
-                fecharLista()
-            fim)
-        fim
+                task.spawn(callback, optVal)
+                closeList()
+            end)
+        end
 
         scrollFrame.CanvasSize = UDim2.new(0,0,0,(#options*26)+8)
-    fim
+    end
 
     rebuildOptions()
     scrollFrame.Visible = false
 
     -------------------------------------------------
-    -- ÁREA DE CLIQUE
+    -- CLICK AREA
     -------------------------------------------------
     local dropdownClickArea = new("TextButton", {
-        Pai = item,
+        Parent = item,
         BackgroundTransparency = 1,
-        Tamanho = UDim2.new(1,0,0,24),
+        Size = UDim2.new(1,0,0,24),
         ZIndex = 2,
-        Texto = "",
-        AutoButtonColor = falso
+        Text = "",
+        AutoButtonColor = false
     })
 
     dropdownClickArea.Activated:Connect(function()
-        se aberto então
-            fecharLista()
-        outro
-            abrir lista()
-        fim
-    fim)
+        if opened then
+            closeList()
+        else
+            openList()
+        end
+    end)
 
     -------------------------------------------------
-    -- API PÚBLICA
+    -- PUBLIC API
     -------------------------------------------------
-    retornar {
-        DefinirOpções = função(novasOpções)
-            opções = novasOpções ou {}
+    return {
+        SetOptions = function(newOptions)
+            options = newOptions or {}
             rebuildOptions()
 
-            se #opções > 0 então
-                ElixirLib.Flags[flag] = opções[1]
+            if #options > 0 then
+                ElixirLib.Flags[flag] = options[1]
                 currentText.Text = tostring(options[1])
-            outro
+            else
                 ElixirLib.Flags[flag] = nil
-                currentText.Text = "Vazio"
-            fim
+                currentText.Text = "Empty"
+            end
 
-            fecharLista()
-        fim,
+            closeList()
+        end,
 
-        AdicionarOpção = função(val)
-            tabela.inserir(opções, valor)
+        AddOption = function(val)
+            table.insert(options, val)
             rebuildOptions()
-        fim,
+        end,
 
-        RemoveOption = função(val)
-            para i,optVal em ipairs(options) faça
-                se optVal == val então
-                    tabela.remover(opções,i)
-                    quebrar
-                fim
-            fim
+        RemoveOption = function(val)
+            for i,optVal in ipairs(options) do
+                if optVal == val then
+                    table.remove(options,i)
+                    break
+                end
+            end
             rebuildOptions()
-        fim,
+        end,
 
-        Limpar = função()
-            opções = {}
+        Clear = function()
+            options = {}
             rebuildOptions()
-            currentText.Text = "Vazio"
+            currentText.Text = "Empty"
             ElixirLib.Flags[flag] = nil
-            fecharLista()
-        fim,
+            closeList()
+        end,
 
-        Conjunto = função(v)
+        Set = function(v)
             ElixirLib.Flags[flag] = v
-            textoAtual.Texto = tostring(v)
-        fim,
+            currentText.Text = tostring(v)
+        end,
 
-        Obter = função()
-            retornar ElixirLib.Flags[flag]
-        fim,
+        Get = function()
+            return ElixirLib.Flags[flag]
+        end,
 
-        Bandeira = bandeira,
+        Flag = flag,
 
-        - NOVO: RefreshOptions
-        Opções de atualização = função()
+        -- âœ¨ NOVO: RefreshOptions
+        RefreshOptions = function()
             rebuildOptions()
-        fim
+        end
     }
-fim
+end
         
         
         
-        -- Adicionar atalho de teclado
-        função tabAPI:AdicionarAtalhoDeTecla(opcional)
-            opt = opt ou {}
-            nome local = opt.Name ou "Keybind"
-            local default = opt.Default ou Enum.KeyCode.Unknown
-            local callback = opt.Callback ou function() fim
-            flag local = opt.Flag ou HttpService:GenerateGUID(false)
+        -- AddKeybind
+        function tabAPI:AddKeybind(opt)
+            opt = opt or {}
+            local name = opt.Name or "Keybind"
+            local default = opt.Default or Enum.KeyCode.Unknown
+            local callback = opt.Callback or function() end
+            local flag = opt.Flag or HttpService:GenerateGUID(false)
 
-            ElixirLib.Flags[flag] = default.Name ou default
+            ElixirLib.Flags[flag] = default.Name or default
 
-            item local = novoItemFrame()
+            local item = newItemFrame()
             item.Size = UDim2.new(1,-12,0,30)
-            rótulo local = novo("TextLabel", {
-                Pai = item,
-                Texto = nome,
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.ItemText,
+            local label = new("TextLabel", {
+                Parent = item,
+                Text = name,
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.ItemText,
                 BackgroundTransparency = 1,
-                Posição = UDim2.new(0,8,0,0),
-                Tamanho = UDim2.new(0.6,-8,1,0),
-                TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+                Position = UDim2.new(0,8,0,0),
+                Size = UDim2.new(0.6,-8,1,0),
+                TextXAlignment = Enum.TextXAlignment.Left
             })
 
             local btn = new("TextButton", {
-                Pai = item,
-                Texto = default.Name ou "Desconhecido",
-                Fonte = Enum.Font.GothamBold,
-                Tamanho do texto = 12,
-                TextColor3 = Tema.ItemText,
-                BackgroundColor3 = Tema.AlternarExterno,
-                Tamanho = UDim2.new(0,90,0,22),
-                Posição = UDim2.new(1,-104,0.5,-11),
-                Tamanho da BordaPixel = 0
+                Parent = item,
+                Text = default.Name or "Unknown",
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Theme.ItemText,
+                BackgroundColor3 = Theme.ToggleOuter,
+                Size = UDim2.new(0,90,0,22),
+                Position = UDim2.new(1,-104,0.5,-11),
+                BorderSizePixel = 0
             })
             makeCorner(btn, 4)
             local stroke = Instance.new("UIStroke", btn)
-            stroke.Color = Tema.AlternarTraçoExternoUI
+            stroke.Color = Theme.ToggleOuterUIStroke
 
-            espera local = falso
-            conexão local
+            local waiting = false
+            local conn
             btn.MouseButton1Click:Connect(function()
-                Se estiver esperando, retorne ao fim.
-                aguardando = verdadeiro
+                if waiting then return end
+                waiting = true
                 btn.Text = "..."
-                stroke.Color = Tema.ItemUIStrokeSelected
+                stroke.Color = Theme.ItemUIStrokeSelected
                 conn = UserInputService.InputBegan:Connect(function(input, gp)
-                    se gp então retorne fim
-                    Se input.KeyCode e input.KeyCode ~= Enum.KeyCode.Unknown então
+                    if gp then return end
+                    if input.KeyCode and input.KeyCode ~= Enum.KeyCode.Unknown then
                         ElixirLib.Flags[flag] = input.KeyCode.Name
                         btn.Text = input.KeyCode.Name
-                        aguardando = falso
-                        stroke.Color = Tema.AlternarTraçoExternoUI
-                        conexão:Desconectar()
-                    fim
-                fim)
-            fim)
+                        waiting = false
+                        stroke.Color = Theme.ToggleOuterUIStroke
+                        conn:Disconnect()
+                    end
+                end)
+            end)
 
-            -- ouvir o pressionamento de tecla
+            -- listen to keypress
             UserInputService.InputBegan:Connect(function(input, gp)
-                se gp então retorne fim
-                Se input.KeyCode e input.KeyCode.Name == ElixirLib.Flags[flag] então
-                    tarefa.spawn(callback)
-                fim
-            fim)
+                if gp then return end
+                if input.KeyCode and input.KeyCode.Name == ElixirLib.Flags[flag] then
+                    task.spawn(callback)
+                end
+            end)
 
-            retornar {
-                Obter = função() retorna ElixirLib.Flags[flag] fim,
-                Conjunto = função(k)
-                    se typeof(k) == "EnumItem" então k = k.Name fim
+            return {
+                Get = function() return ElixirLib.Flags[flag] end,
+                Set = function(k)
+                    if typeof(k) == "EnumItem" then k = k.Name end
                     ElixirLib.Flags[flag] = tostring(k)
                     btn.Text = tostring(k)
-                fim,
-                Bandeira = bandeira
+                end,
+                Flag = flag
             }
-        fim
+        end
 
  
         
-        -- Adicionar caixa de texto
-função tabAPI:AdicionarCaixaDeTexto(opcional)
-    opt = opt ou {}
-    nome local = opt.Name ou "Caixa de texto"
-    local placeholder = opt.Placeholder ou ""
-    local callback = opt.Callback ou function() fim
-    flag local = opt.Flag ou HttpService:GenerateGUID(false)
+        -- AddTextbox
+function tabAPI:AddTextbox(opt)
+    opt = opt or {}
+    local name = opt.Name or "Textbox"
+    local placeholder = opt.Placeholder or ""
+    local callback = opt.Callback or function() end
+    local flag = opt.Flag or HttpService:GenerateGUID(false)
 
-    item local = novo("Frame", {
-        Pai = conteúdo da aba,
+    local item = new("Frame", {
+        Parent = tabContent,
         BackgroundColor3 = Theme.ItemFrame,
-        Tamanho = UDim2.new(1,-12,0,30), -- altura menor
-        Tamanho da BordaPixel = 0
+        Size = UDim2.new(1,-12,0,30), -- altura menor
+        BorderSizePixel = 0
     })
     makeCorner(item, 4)
     local stroke = Instance.new("UIStroke", item)
-    stroke.Color = Tema.ItemUIStroke
+    stroke.Color = Theme.ItemUIStroke
 
-    rótulo local = novo("TextLabel", {
-        Pai = item,
-        Texto = nome,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Color3.fromRGB(255.255.255), -- branco
+    local label = new("TextLabel", {
+        Parent = item,
+        Text = name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Color3.fromRGB(255,255,255), -- branco
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,8,0,0),
-        Tamanho = UDim2.new(0.35, -8, 1, 0),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+        Position = UDim2.new(0,8,0,0),
+        Size = UDim2.new(0.35, -8, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
     local textbox = new("TextBox", {
-        Pai = item,
-        Texto = "",
-        Texto do espaço reservado = espaço reservado,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Color3.fromRGB(255.255.255), -- branco
+        Parent = item,
+        Text = "",
+        PlaceholderText = placeholder,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Color3.fromRGB(255,255,255), -- branco
         PlaceholderColor3 = Theme.InputPlaceHolder,
         BackgroundTransparency = 0.7,
-        BackgroundColor3 = Theme.ToggleOuter, -- fundo levemente visível
-        Position = UDim2.new(0.37,2,0.15,0), -- mesmo nível do rótulo
-        Tamanho = UDim2.new(0.6,-10,0.7,0) -- menor altura
+        BackgroundColor3 = Theme.ToggleOuter, -- fundo levemente visÃ­vel
+        Position = UDim2.new(0.37,2,0.15,0), -- mesmo nÃ­vel do label
+        Size = UDim2.new(0.6,-10,0.7,0) -- menor altura
     })
-    criarCanto(caixa de texto, 4)
+    makeCorner(textbox, 4)
 
-    textbox.Focused:Connect(function()
-        stroke.Color = Tema.ItemUIStrokeSelected
-    fim)
+    textbox.Focused:Connect(function() 
+        stroke.Color = Theme.ItemUIStrokeSelected
+    end)
     textbox.FocusLost:Connect(function(enter)
-        stroke.Color = Tema.ItemUIStroke
+        stroke.Color = Theme.ItemUIStroke
         ElixirLib.Flags[flag] = textbox.Text
-        tarefa.spawn(callback, textbox.Text)
-    fim)
+        task.spawn(callback, textbox.Text)
+    end)
 
-    retornar {
-        Obter = função() retorna ElixirLib.Flags[flag] fim,
-        Conjunto = função(v)
+    return {
+        Get = function() return ElixirLib.Flags[flag] end,
+        Set = function(v) 
             ElixirLib.Flags[flag] = v
             textbox.Text = tostring(v)
-        fim,
-        Bandeira = bandeira
+        end,
+        Flag = flag
     }
-fim
+end
 
--- Botão Adicionar
-função tabAPI:AddButton(opt)
-    opt = opt ou {}
-    nome local = opt.Name ou "Botão"
-    local callback = opt.Callback ou function() fim
+-- AddButton
+function tabAPI:AddButton(opt)
+    opt = opt or {}
+    local name = opt.Name or "Button"
+    local callback = opt.Callback or function() end
 
-    item local = novoItemFrame()
+    local item = newItemFrame()
     item.Size = UDim2.new(1,-12,0,30)
-    rótulo local = novo("TextLabel", {
-        Pai = item,
-        Texto = nome,
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.ItemText,
+    local label = new("TextLabel", {
+        Parent = item,
+        Text = name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.ItemText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,8,0,0),
-        Tamanho = UDim2.new(0.7,-8,1,0),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+        Position = UDim2.new(0,8,0,0),
+        Size = UDim2.new(0.7,-8,1,0),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    botão local = novo("TextButton", {
-        Pai = item,
-        Texto = "Executar",
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.SectionText,
-        BackgroundColor3 = Theme.SelectedTabFrame, -- cinza padrÃƒÂ£o
-        Tamanho = UDim2.new(0,90,0,22),
-        Posição = UDim2.new(1,-104,0.5,-11),
-        Tamanho da BordaPixel = 0
+    local button = new("TextButton", {
+        Parent = item,
+        Text = "Execute",
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.SectionText,
+        BackgroundColor3 = Theme.SelectedTabFrame, -- cinza padrÃ£o
+        Size = UDim2.new(0,90,0,22),
+        Position = UDim2.new(1,-104,0.5,-11),
+        BorderSizePixel = 0
     })
-    makeCorner(botão, 4)
+    makeCorner(button, 4)
     local btnStroke = Instance.new("UIStroke", button)
-    btnStroke.Color = Tema.MainUIStroke
+    btnStroke.Color = Theme.MainUIStroke
 
-    botão.MouseEnter:Conectar(função()
+    button.MouseEnter:Connect(function()
         TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.Highlight}):Play()
-    fim)
-    botão.MouseLeave:Conectar(função()
+    end)
+    button.MouseLeave:Connect(function()
         TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.SelectedTabFrame}):Play()
-    fim)
+    end)
 
-    botão.MouseButton1Click:Conectar(função()
+    button.MouseButton1Click:Connect(function()
         -- muda para ciano momentaneamente
         local originalColor = button.BackgroundColor3
-        botão.CorDeFundo3 = Tema.Destaque
-        tarefa.spawn(callback)
+        button.BackgroundColor3 = Theme.Highlight
+        task.spawn(callback)
         task.delay(0.2, function() -- volta para cinza
-            botão.CorDeFundo3 = corOriginal
-        fim)
-    fim)
+            button.BackgroundColor3 = originalColor
+        end)
+    end)
 
-    retornar {
-        Pressionar = função() tarefa.spawn(callback) fim
+    return {
+        Press = function() task.spawn(callback) end
     }
-fim
+end
 
---seletor de cores
+--colorpicker 
 
--- Adicionar seletor de cores
-função tabAPI:AdicionarSeletorDeCores(opcional)
-	opt = opt ou {}
+-- AddColorpicker
+function tabAPI:AddColorpicker(opt)
+	opt = opt or {}
 
 	local UserInputService = game:GetService("UserInputService")
 	local TweenService = game:GetService("TweenService")
 
-	nome local = opt.Name ou "Colorpicker"
-	local default = opt.Default ou Color3.fromRGB(255, 255, 255)
-	local callback = opt.Callback ou function() fim
-	flag local = opt.Flag ou HttpService:GenerateGUID(false)
+	local name = opt.Name or "Colorpicker"
+	local default = opt.Default or Color3.fromRGB(255, 255, 255)
+	local callback = opt.Callback or function() end
+	local flag = opt.Flag or HttpService:GenerateGUID(false)
 
-	ElixirLib.Flags[flag] = padrão
+	ElixirLib.Flags[flag] = default
 
-	-- base de itens
-	item local = novoItemFrame()
+	-- item base
+	local item = newItemFrame()
 	item.Size = UDim2.new(1, -12, 0, 28)
 	item.ClipsDescendants = true
 
-	local ALTURA_FECHADA = 28
-	local PICHER_HEIGHT = 120
-	local OPEN_HEIGHT = CLOSED_HEIGHT + PICLER_HEIGHT + 4
+	local CLOSED_HEIGHT = 28
+	local PICKER_HEIGHT = 120
+	local OPEN_HEIGHT = CLOSED_HEIGHT + PICKER_HEIGHT + 4
 
-	-- rótulo
-	rótulo local = novo("TextLabel", {
-		Pai = item,
-		Texto = nome,
-		Fonte = Enum.Font.GothamBold,
-		Tamanho do texto = 12,
-		TextColor3 = Tema.ItemText,
+	-- label
+	local label = new("TextLabel", {
+		Parent = item,
+		Text = name,
+		Font = Enum.Font.GothamBold,
+		TextSize = 12,
+		TextColor3 = Theme.ItemText,
 		BackgroundTransparency = 1,
-		Posição = UDim2.new(0, 8, 0, 0),
-		Tamanho = UDim2.new(0.7, -8, 0, 28),
-		TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+		Position = UDim2.new(0, 8, 0, 0),
+		Size = UDim2.new(0.7, -8, 0, 28),
+		TextXAlignment = Enum.TextXAlignment.Left
 	})
 
-	-- pré-visualização
+	-- preview
 	local btn = new("TextButton", {
-		Pai = item,
-		Texto = "",
-		BackgroundColor3 = padrão,
-		Tamanho = UDim2.new(0, 42, 0, 18),
-		Posição = UDim2.new(1, -56, 0, 5),
-		TamanhoBordaPixel = 0,
-		AutoButtonColor = falso
+		Parent = item,
+		Text = "",
+		BackgroundColor3 = default,
+		Size = UDim2.new(0, 42, 0, 18),
+		Position = UDim2.new(1, -56, 0, 5),
+		BorderSizePixel = 0,
+		AutoButtonColor = false
 	})
 	makeCorner(btn, 4)
 
 	local stroke = Instance.new("UIStroke", btn)
-	stroke.Color = Tema.AlternarTraçoExternoUI
-	espessura do traço = 1
+	stroke.Color = Theme.ToggleOuterUIStroke
+	stroke.Thickness = 1
 
-	-- colhedor embutido
-	seletor local = novo("Frame", {
-		Pai = item,
-		BackgroundColor3 = Tema.AlternarExterno,
-		Tamanho = UDim2.new(1, -12, 0, 0),
-		Posição = UDim2.new(0, 6, 0, 32),
-		Tamanho da BordaPixel = 0
+	-- picker embutido
+	local picker = new("Frame", {
+		Parent = item,
+		BackgroundColor3 = Theme.ToggleOuter,
+		Size = UDim2.new(1, -12, 0, 0),
+		Position = UDim2.new(0, 6, 0, 32),
+		BorderSizePixel = 0
 	})
 	makeCorner(picker, 6)
 
 	-- mapa de cores
-	imagem local = novo("RótuloImagem", {
-		Pai = seletor,
-		Imagem = "rbxassetid://98986117103379",
+	local image = new("ImageLabel", {
+		Parent = picker,
+		Image = "rbxassetid://98986117103379",
 		BackgroundTransparency = 1,
-		Tamanho = UDim2.new(1, 0, 1, 0)
+		Size = UDim2.new(1, 0, 1, 0)
 	})
 
 	-- estado
-	local aberto = falso
-	arrastar local = falso
+	local opened = false
+	local dragging = false
 
-	-- auxiliar pré-adolescente
-	função local tween(obj, props, time)
-		TweenService:Criar(
+	-- tween helper
+	local function tween(obj, props, time)
+		TweenService:Create(
 			obj,
-			TweenInfo.new(tempo, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			adereços
-		):Jogar()
-	fim
+			TweenInfo.new(time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			props
+		):Play()
+	end
 
 	-- abrir
-	função local openPicker()
-		Se estiver aberto, retorne ao fim.
-		aberto = verdadeiro
+	local function openPicker()
+		if opened then return end
+		opened = true
 		tween(item, {Size = UDim2.new(1, -12, 0, OPEN_HEIGHT)}, 0.25)
 		tween(picker, {Size = UDim2.new(1, -12, 0, PICKER_HEIGHT)}, 0.25)
-		stroke.Color = Tema.ItemUIStrokeSelected
-	fim
+		stroke.Color = Theme.ItemUIStrokeSelected
+	end
 
 	-- fechar
-	função local closePicker()
-		Se não estiver aberto, retorne ao fim.
-		aberto = falso
+	local function closePicker()
+		if not opened then return end
+		opened = false
 		tween(item, {Size = UDim2.new(1, -12, 0, CLOSED_HEIGHT)}, 0.25)
 		tween(picker, {Size = UDim2.new(1, -12, 0, 0)}, 0.25)
-		stroke.Color = Tema.AlternarTraçoExternoUI
-	fim
+		stroke.Color = Theme.ToggleOuterUIStroke
+	end
 
-	--botão preview apenas ABRE
-	btn.MouseButton1Down:Conectar(openPicker)
+	-- botÃ£o preview apenas ABRE
+	btn.MouseButton1Down:Connect(openPicker)
 
-	--conversão fiel ao mapa
-	função local setColorFromPosition(pos)
+	-- conversÃ£o fiel ao mapa
+	local function setColorFromPosition(pos)
 		local x = (pos.X - image.AbsolutePosition.X) / image.AbsoluteSize.X
 		local y = (pos.Y - image.AbsolutePosition.Y) / image.AbsoluteSize.Y
 
@@ -1570,189 +1570,189 @@ função tabAPI:AdicionarSeletorDeCores(opcional)
 		local h = x
 		local s, v
 
-		Se y < 0,5 então
+		if y < 0.5 then
 			s = y * 2
 			v = 1
-		outro
+		else
 			s = 1
-			v = 1 - ((y - 0,5) * 2)
-		fim
+			v = 1 - ((y - 0.5) * 2)
+		end
 
-		cor local = Color3.fromHSV(h, s, v)
+		local color = Color3.fromHSV(h, s, v)
 
-		ElixirLib.Flags[flag] = cor
-		btn.BackgroundColor3 = cor
-		callback(cor)
-	fim
+		ElixirLib.Flags[flag] = color
+		btn.BackgroundColor3 = color
+		callback(color)
+	end
 
-	-- Início da entrada (PC + CELULAR)
-	imagem.InputBegan:Conectar(função(entrada)
-		se input.UserInputType == Enum.UserInputType.MouseButton1
-		ou input.UserInputType == Enum.UserInputType.Touch então
-			arrastar = verdadeiro
-			abrirPicker()
-			definirCorDaPosição(entrada.Posição)
-		fim
-	fim)
+	-- input begin (PC + MOBILE)
+	image.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			openPicker()
+			setColorFromPosition(input.Position)
+		end
+	end)
 
-	-- entrada mover (GLOBAL)
+	-- input move (GLOBAL)
 	UserInputService.InputChanged:Connect(function(input)
-		Se não estiver arrastando, retorne ao fim.
+		if not dragging then return end
 
-		se input.UserInputType == Enum.UserInputType.MouseMovement
-		ou input.UserInputType == Enum.UserInputType.Touch então
-			definirCorDaPosição(entrada.Posição)
-		fim
-	fim)
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch then
+			setColorFromPosition(input.Position)
+		end
+	end)
 
-	-- final de entrada - FECHA
+	-- input end â†’ FECHA
 	UserInputService.InputEnded:Connect(function(input)
-		se input.UserInputType == Enum.UserInputType.MouseButton1
-		ou input.UserInputType == Enum.UserInputType.Touch então
-			se arrastar então
-				arrastar = falso
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+			if dragging then
+				dragging = false
 				closePicker()
-			fim
-		fim
-	fim)
+			end
+		end
+	end)
 
-	retornar {
-		Obter = função()
-			retornar ElixirLib.Flags[flag]
-		fim,
-		Conjunto = função(c)
-			se typeof(c) == "Color3" então
+	return {
+		Get = function()
+			return ElixirLib.Flags[flag]
+		end,
+		Set = function(c)
+			if typeof(c) == "Color3" then
 				ElixirLib.Flags[flag] = c
 				btn.BackgroundColor3 = c
 				callback(c)
-			fim
-		fim,
-		Bandeira = bandeira
+			end
+		end,
+		Flag = flag
 	}
-fim
+end
 
 
--- Seção
-função tabAPI:AdicionarSeção(opcional)
-    opt = opt ou {}
-    nome local = opt.Name ou "Seção"
+-- Section
+function tabAPI:AddSection(opt)
+    opt = opt or {}
+    local name = opt.Name or "Section"
 
-    item local = novoItemFrame()
+    local item = newItemFrame()
     item.Size = UDim2.new(1, -12, 0, 18)
     item.BackgroundTransparency = 1
 
     -- Linha + nome + linha
-    texto local = novo("TextLabel", {
-        Pai = item,
-        Texto = "" .. tostring(nome) .. "",
-        Fonte = Enum.Font.GothamBold,
-        TextSize = 12, -- tamanho do texto da Seção
-        TextColor3 = Tema.Destaque,
+    local text = new("TextLabel", {
+        Parent = item,
+        Text = "" .. tostring(name) .. "",
+        Font = Enum.Font.GothamBold,
+        TextSize = 12, -- tamanho do texto da Section
+        TextColor3 = Theme.Highlight,
         BackgroundTransparency = 1,
-        Tamanho = UDim2.new(1, 0, 0, 18),
-        TextXAligment = Enum.TextXAligment.Center
+        Size = UDim2.new(1, 0, 0, 18),
+        TextXAlignment = Enum.TextXAlignment.Center
     })
 
-    -- Conteúdo da Seção (elementos adicionais abaixo)
+    -- ConteÃºdo da Section (elementos adicionados abaixo)
     local sectionContent = new("UIListLayout", {
-        Pai = conteúdo da aba,
-        OrdemDeClassificação = Enum.OrdemDeClassificação.OrdemDeLayout,
+        Parent = tabContent,
+        SortOrder = Enum.SortOrder.LayoutOrder,
         Padding = UDim.new(0, 4)
     })
 
-    -- API da Seção
-    seção local API = {}
+    -- API da Section
+    local sectionAPI = {}
 
-    --rótulo
-    função sectionAPI:AddLabel(textLabel)
-        textLabel = textLabel ou "Label"
-        rótulo local = novo("TextLabel", {
+    -- Adicionar Label
+    function sectionAPI:AddLabel(textLabel)
+        textLabel = textLabel or "Label"
+        local label = new("TextLabel", {
             Parent = tabContent, -- adiciona na mesma tab, empurrando outros elementos
-            Texto = rótulo de texto,
-            Fonte = Enum.Font.Gotham,
-            TextSize = 11, -- menor que a Seção
-            TextColor3 = Color3.fromRGB(255.255.255),
+            Text = textLabel,
+            Font = Enum.Font.Gotham,
+            TextSize = 11, -- menor que a Section
+            TextColor3 = Color3.fromRGB(255,255,255),
             BackgroundTransparency = 1,
-            Tamanho = UDim2.new(1, -12, 0, 16),
-            TextXAlinhamento = Enum.TextXAlinhamento.Esquerda
+            Size = UDim2.new(1, -12, 0, 16),
+            TextXAlignment = Enum.TextXAlignment.Left
         })
-        retornar {
-            DefinirTexto = função(novoTexto)
-                label.Text = novoTexto
-            fim
+        return {
+            SetText = function(newText)
+                label.Text = newText
+            end
         }
-    fim
+    end
 
-    seção de retorno API
-fim
+    return sectionAPI
+end
 
 
 
-função tabAPI:AdicionarRótulo(opcional)
-    opt = opt ou {}
-    local text = opt[1] ou "" -- pega o primeiro item da tabela
-    item local = novo("Frame", {
-        Pai = conteúdo da aba,
+function tabAPI:AddLabel(opt)
+    opt = opt or {}
+    local text = opt[1] or ""  -- pega o primeiro item da tabela
+    local item = new("Frame", {
+        Parent = tabContent,
         BackgroundColor3 = Theme.ItemFrame,
-        Tamanho = UDim2.new(1, -12, 0, 30),
-        Tamanho da BordaPixel = 0
+        Size = UDim2.new(1, -12, 0, 30),
+        BorderSizePixel = 0
     })
     makeCorner(item, 4)
 
-    rótulo local = novo("TextLabel", {
-        Pai = item,
-        Text = table.concat(opt, "\n"), -- junta todas as linhas com quebra de linha
-        Fonte = Enum.Font.GothamBold,
-        Tamanho do texto = 12,
-        TextColor3 = Tema.ItemText,
+    local label = new("TextLabel", {
+        Parent = item,
+        Text = table.concat(opt, "\n"),  -- junta todas as linhas com quebra de linha
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = Theme.ItemText,
         BackgroundTransparency = 1,
-        Posição = UDim2.new(0,8,0,0),
-        Tamanho = UDim2.new(1,-16,1,0),
-        TextXAlinhamento = Enum.TextXAlinhamento.Esquerda,
+        Position = UDim2.new(0,8,0,0),
+        Size = UDim2.new(1,-16,1,0),
+        TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Top
     })
 
-    retornar {
-        DefinirTexto = função(novoTexto)
-            se typeof(newText) == "table" então
+    return {
+        SetText = function(newText)
+            if typeof(newText) == "table" then
                 label.Text = table.concat(newText, "\n")
-            outro
-                label.Text = tostring(novoTexto)
-            fim
-        fim
+            else
+                label.Text = tostring(newText)
+            end
+        end
     }
-fim
+end
 
 
-público local = {
-	AdicionarAlternar = tabAPI.AdicionarAlternar,
+local public = {
+	AddToggle = tabAPI.AddToggle,
 	AddButton = tabAPI.AddButton,
-	AdicionarSlider = tabAPI.AdicionarSlider,
-	AdicionarEntrada = tabAPI.AdicionarEntrada,
-	AdicionarDropdown = tabAPI.AdicionarDropdown,
+	AddSlider = tabAPI.AddSlider,
+	AddInput = tabAPI.AddInput,
+	AddDropdown = tabAPI.AddDropdown,
 	AddBind = tabAPI.AddKeybind,
-	AdicionarSeção = tabAPI.AdicionarSeção,
-	AdicionarCaixaDeTexto = tabAPI.AdicionarCaixaDeTexto,
-	AdicionarSeletorDeCores = tabAPI.AdicionarSeletorDeCores,
-	AddLabel = tabAPI.AddLabel, -- <=== adicionado aqui
+	AddSection = tabAPI.AddSection,
+	AddTextbox = tabAPI.AddTextbox,
+	AddColorpicker = tabAPI.AddColorpicker,
+	AddLabel = tabAPI.AddLabel,  -- <=== adicionado aqui
 	_internalId = id
 }
 
     
-    retornar público
+    return public
     
 
 
 
-    fim
+    end
 
-    -- retornar objeto para o usuário
-    retornar {
+    -- return object for user
+    return {
         MakeTab = windowObj.MakeTab,
         MakeSidePanel = windowObj.MakeSidePanel,
         _gui = screenGui,
-        _main = principal
+        _main = main
     }
-fim
+end
 
-retornar ElixirLib
+return ElixirLib
