@@ -1,3 +1,5 @@
+--
+
 -- ElixirLib: MakeWindow, MakeTab (IconId), AddToggle, AddButton, AddSlider, AddInput, AddDropdown, AddKeybind
 -- Theme: Dark
 
@@ -74,9 +76,22 @@ local rootFolder = Instance.new("Folder")
 rootFolder.Name = HttpService:GenerateGUID(false)
 rootFolder.Parent = CoreGui
 
+
+
 function ElixirLib:MakeWindow(info)
     info = info or {}
-    local title = info.Name or "Elixir Window"
+
+    -- ============================================================
+    -- 🎯 TÍTULO AUTOMÁTICO (sua ideia genial!)
+    -- ============================================================
+    local MarketplaceService = game:GetService("MarketplaceService")
+    local gameName = "Unknown Game"
+    pcall(function()
+        local productInfo = MarketplaceService:GetProductInfo(game.PlaceId)
+        gameName = productInfo.Name
+    end)
+    -- Título padrão: "Elixir Client | Nome do Jogo"
+    local title = info.Name or ("Elixir Client | " .. gameName)
 
     -- ScreenGui
     local screenGui = new("ScreenGui", { Parent = rootFolder, ResetOnSpawn = false })
@@ -105,7 +120,7 @@ function ElixirLib:MakeWindow(info)
     end
     makeCorner(shadow, 6)
 
-    -- Main frame (pequeno inicialmente)
+    -- Main frame
     local main = new("Frame", {
         Parent = screenGui,
         BackgroundColor3 = Theme.Main,
@@ -125,6 +140,7 @@ function ElixirLib:MakeWindow(info)
     })
     makeCorner(topbar, 6)
 
+    -- Título (agora automático!)
     local titleLabel = new("TextLabel", {
         Parent = topbar,
         Text = title,
@@ -147,7 +163,6 @@ function ElixirLib:MakeWindow(info)
     })
 
     local isMinimized = false
-    local notificationShown = false
     local function toggleUI()
         isMinimized = not isMinimized
         main.Visible = not isMinimized
@@ -190,6 +205,20 @@ function ElixirLib:MakeWindow(info)
             dragInputMain = input
         end
     end)
+
+    -- Retorna a janela pro script
+    return {
+        ScreenGui = screenGui,
+        Main = main,
+        TitleLabel = titleLabel,
+        IsMinimized = function() return isMinimized end,
+        Toggle = toggleUI,
+        MakeTab = function(...) return ElixirLib:MakeTab(...) end
+    }
+end
+
+
+
 
     -- BotÃ£o flutuante
     local floatButton = Instance.new("ImageButton")
