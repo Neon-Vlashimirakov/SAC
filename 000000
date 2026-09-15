@@ -1,7 +1,6 @@
---
-
 -- ElixirLib: MakeWindow, MakeTab (IconId), AddToggle, AddButton, AddSlider, AddInput, AddDropdown, AddKeybind
 -- Theme: Dark
+-- ✅ TÍTULO AUTOMÁTICO DIRETO NA LIB
 
 local ElixirLib = {}
 ElixirLib.Flags = {}
@@ -76,13 +75,11 @@ local rootFolder = Instance.new("Folder")
 rootFolder.Name = HttpService:GenerateGUID(false)
 rootFolder.Parent = CoreGui
 
-
-
 function ElixirLib:MakeWindow(info)
     info = info or {}
 
     -- ============================================================
-    -- 🎯 TÍTULO AUTOMÁTICO (sua ideia genial!)
+    -- 🎯 TÍTULO AUTOMÁTICO — A MAGIA ACONTECE AQUI!
     -- ============================================================
     local MarketplaceService = game:GetService("MarketplaceService")
     local gameName = "Unknown Game"
@@ -90,8 +87,13 @@ function ElixirLib:MakeWindow(info)
         local productInfo = MarketplaceService:GetProductInfo(game.PlaceId)
         gameName = productInfo.Name
     end)
-    -- Título padrão: "Elixir Client | Nome do Jogo"
-    local title = info.Name or ("Elixir Client | " .. gameName)
+    -- Se passar Name="" ou não passar nada → usa o automático
+    local title
+    if info.Name and info.Name ~= "" then
+        title = info.Name
+    else
+        title = "Elixir Client | " .. gameName
+    end
 
     -- ScreenGui
     local screenGui = new("ScreenGui", { Parent = rootFolder, ResetOnSpawn = false })
@@ -140,7 +142,6 @@ function ElixirLib:MakeWindow(info)
     })
     makeCorner(topbar, 6)
 
-    -- Título (agora automático!)
     local titleLabel = new("TextLabel", {
         Parent = topbar,
         Text = title,
@@ -206,21 +207,7 @@ function ElixirLib:MakeWindow(info)
         end
     end)
 
-    -- Retorna a janela pro script
-    return {
-        ScreenGui = screenGui,
-        Main = main,
-        TitleLabel = titleLabel,
-        IsMinimized = function() return isMinimized end,
-        Toggle = toggleUI,
-        MakeTab = function(...) return ElixirLib:MakeTab(...) end
-    }
-end
-
-
-
-
-    -- BotÃ£o flutuante
+    -- Botão flutuante
     local floatButton = Instance.new("ImageButton")
     floatButton.Name = "FloatingToggleButton"
     floatButton.Size = UDim2.new(0,40,0,40)
@@ -259,21 +246,20 @@ end
     end)
     floatButton.MouseButton1Click:Connect(toggleUI)
 
-        -- BotÃ£o de resize INVISÃVEL, mostrando apenas o asset da seta
-        local resizeButton = Instance.new("ImageButton")
-        resizeButton.Name = "ResizeButton"
-        resizeButton.Size = UDim2.new(0,20,0,20)
-        resizeButton.Position = UDim2.new(1,-25,1,-25)
-        resizeButton.AnchorPoint = Vector2.new(0,0)
-        resizeButton.BackgroundTransparency = 1
-        resizeButton.BorderSizePixel = 0
-        resizeButton.ZIndex = 50
-        resizeButton.Image = "rbxassetid://3926307971" -- sprite oficial Roblox
-        resizeButton.ImageRectOffset = Vector2.new(924, 244) -- seta diagonal
-        resizeButton.ImageRectSize = Vector2.new(36, 36)
-        resizeButton.ImageColor3 = Theme.ItemText
-        resizeButton.Parent = main
-    
+    -- Botão de resize INVISÍVEL
+    local resizeButton = Instance.new("ImageButton")
+    resizeButton.Name = "ResizeButton"
+    resizeButton.Size = UDim2.new(0,20,0,20)
+    resizeButton.Position = UDim2.new(1,-25,1,-25)
+    resizeButton.AnchorPoint = Vector2.new(0,0)
+    resizeButton.BackgroundTransparency = 1
+    resizeButton.BorderSizePixel = 0
+    resizeButton.ZIndex = 50
+    resizeButton.Image = "rbxassetid://3926307971"
+    resizeButton.ImageRectOffset = Vector2.new(924, 244)
+    resizeButton.ImageRectSize = Vector2.new(36, 36)
+    resizeButton.ImageColor3 = Theme.ItemText
+    resizeButton.Parent = main
 
     local resizeDragging, dragInputResize, resizeStart, startSize = false, nil, nil, nil
     resizeButton.InputBegan:Connect(function(input)
@@ -299,10 +285,9 @@ end
         end
     end)
 
-    -- windowObj precisa existir antes do MakeSidePanel usar "function windowObj:..."
     local windowObj = {}
 
-    -- ===================== Scripts Side Panel (modelo do usuário) =====================
+    -- ===================== Scripts Side Panel =====================
     local panelWidth = 180
     local panelOpen = false
 
@@ -328,7 +313,6 @@ end
     panelStroke.Parent = scriptsPanel
     panelStroke.Color = Theme.MainUIStroke
 
-    -- Atualiza posição/tamanho caso a janela seja movida/redimensionada
     RunService.RenderStepped:Connect(function()
         scriptsPanel.Position = UDim2.new(
             0,
@@ -336,15 +320,12 @@ end
             0,
             main.AbsolutePosition.Y
         )
-
         if not panelOpen then
             scriptsPanel.Size = UDim2.new(0, 0, 0, main.AbsoluteSize.Y)
         else
             scriptsPanel.Size = UDim2.new(0, panelWidth, 0, main.AbsoluteSize.Y)
         end
     end)
-
-    --------------------------------------------------------
 
     local panelTitle = Instance.new("TextLabel")
     panelTitle.Parent = scriptsPanel
@@ -355,8 +336,6 @@ end
     panelTitle.TextSize = 14
     panelTitle.TextColor3 = Theme.TabText
     panelTitle.ZIndex = 6
-
-    --------------------------------------------------------
 
     local list = Instance.new("ScrollingFrame")
     list.Parent = scriptsPanel
@@ -373,9 +352,6 @@ end
     local layout = Instance.new("UIListLayout")
     layout.Parent = list
     layout.Padding = UDim.new(0,5)
-
-    --------------------------------------------------------
-    -- Botão da seta
 
     local arrowButton = Instance.new("TextButton")
     arrowButton.Parent = screenGui
@@ -401,9 +377,7 @@ end
             0,
             main.AbsolutePosition.Y + main.AbsoluteSize.Y/2 - 30
         )
-
         arrowButton.Visible = main.Visible
-
         if not main.Visible then
             scriptsPanel.Visible = false
         else
@@ -411,48 +385,37 @@ end
         end
     end)
 
-    --------------------------------------------------------
-
     local function ToggleScriptsPanel()
         panelOpen = not panelOpen
-
         TweenService:Create(
             scriptsPanel,
             TweenInfo.new(.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-            {
-                Size = UDim2.new(0, panelOpen and panelWidth or 0, 0, main.AbsoluteSize.Y)
-            }
+            {Size = UDim2.new(0, panelOpen and panelWidth or 0, 0, main.AbsoluteSize.Y)}
         ):Play()
-
         arrowButton.Text = panelOpen and "<" or ">"
     end
 
     arrowButton.MouseButton1Click:Connect(ToggleScriptsPanel)
-
-    --------------------------------------------------------
-    -- API pública do painel lateral, exposta via Window:MakeSidePanel({Name=...})
 
     local function newSidePanelButton(opt)
         opt = opt or {}
         local btnName = opt.Name or "Button"
         local callback = opt.Callback or function() end
 
-        local button = Instance.new("TextButton")
-        button.Parent = list
-        button.Size = UDim2.new(1,-2,0,28)
-        button.BackgroundColor3 = Theme.ItemFrame
-        button.Text = btnName
-        button.Font = Enum.Font.GothamBold
-        button.TextSize = 12
-        button.TextColor3 = Theme.ItemText
-        button.BorderSizePixel = 0
-        button.AutoButtonColor = false
-        button.ZIndex = 6
-
+        local button = new("TextButton", {
+            Parent = list,
+            Size = UDim2.new(1,-2,0,28),
+            BackgroundColor3 = Theme.ItemFrame,
+            Text = btnName,
+            Font = Enum.Font.GothamBold,
+            TextSize = 12,
+            TextColor3 = Theme.ItemText,
+            BorderSizePixel = 0,
+            AutoButtonColor = false,
+            ZIndex = 6
+        })
         makeCorner(button, 4)
-
-        local stroke = Instance.new("UIStroke")
-        stroke.Parent = button
+        local stroke = Instance.new("UIStroke", button)
         stroke.Color = Theme.ItemUIStroke
 
         button.MouseEnter:Connect(function()
@@ -461,10 +424,7 @@ end
         button.MouseLeave:Connect(function()
             TweenService:Create(button, TweenInfo.new(.12), {BackgroundColor3 = Theme.ItemFrame}):Play()
         end)
-
-        button.MouseButton1Click:Connect(function()
-            task.spawn(callback)
-        end)
+        button.MouseButton1Click:Connect(function() task.spawn(callback) end)
 
         return {
             Press = function() task.spawn(callback) end,
@@ -474,23 +434,13 @@ end
     end
 
     local sidePanelAPI = {}
-    function sidePanelAPI:AddButton(opt)
-        return newSidePanelButton(opt)
-    end
+    function sidePanelAPI:AddButton(opt) return newSidePanelButton(opt) end
     function sidePanelAPI:Clear()
-        for _, v in ipairs(list:GetChildren()) do
-            if v:IsA("TextButton") then v:Destroy() end
-        end
+        for _, v in ipairs(list:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
     end
-    function sidePanelAPI:SetTitle(newTitle)
-        panelTitle.Text = tostring(newTitle)
-    end
-    function sidePanelAPI:Open()
-        if not panelOpen then ToggleScriptsPanel() end
-    end
-    function sidePanelAPI:Close()
-        if panelOpen then ToggleScriptsPanel() end
-    end
+    function sidePanelAPI:SetTitle(newTitle) panelTitle.Text = tostring(newTitle) end
+    function sidePanelAPI:Open() if not panelOpen then ToggleScriptsPanel() end end
+    function sidePanelAPI:Close() if panelOpen then ToggleScriptsPanel() end end
 
     function windowObj:MakeSidePanel(info)
         info = info or {}
@@ -498,6 +448,8 @@ end
         return sidePanelAPI
     end
     -- ===================== fim Side Panel =====================
+
+
 
     -- Main stroke
 local mainStroke = Instance.new("UIStroke", main)
